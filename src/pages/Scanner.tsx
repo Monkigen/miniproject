@@ -5,14 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import FileDeliveryScanner from "@/components/FileDeliveryScanner";
 import { ShieldAlert, AlertCircle } from "lucide-react";
-import { doc, getDoc, updateDoc, increment } from "firebase/firestore";
+import { doc, getDoc, updateDoc, increment, collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useToast } from "@/components/ui/use-toast";
+import { useSubscription } from "@/contexts/SubscriptionContext";
 
 const Scanner = () => {
   const { currentUser } = useAuth();
   const { toast } = useToast();
   const [scanning, setScanning] = useState(false);
+  const { useToken } = useSubscription();
 
   if (!currentUser) {
     return (
@@ -85,8 +87,33 @@ const Scanner = () => {
 
       // Deduct one token
       await updateDoc(userRef, {
-        tokens: increment(-1)
+        tokens: increment(0)
       });
+
+      // Use token from subscription context
+      const tokenUsed = await useToken();
+      if (!tokenUsed) {
+        throw new Error("Failed to deduct token");
+      }
+
+      // Update order status
+      const ordersRef = collection(db, "orders");
+      const q = query(
+        ordersRef,
+        where("userId", "==", userId),
+        where("deliveryDetails.status", "!=", "delivered")
+      );
+      
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        const orderDoc = querySnapshot.docs[0];
+        await updateDoc(doc(db, "orders", orderDoc.id), {
+          "deliveryDetails.status": "delivered",
+          "deliveryDetails.deliveredAt": new Date().toISOString(),
+          "deliveryDetails.deliveryPartnerId": currentUser.uid,
+          "trackingStatus": "delivered"
+        });
+      }
 
       toast({
         title: "Delivery Confirmed",

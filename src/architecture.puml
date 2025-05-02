@@ -1,0 +1,68 @@
+@startuml
+title Campus Bite Kitchen - App Architecture
+
+package "App" {
+  [App] as AppComponent
+}
+
+package "Context Providers" {
+  [QueryClientProvider]
+  [ThemeProvider]
+  [AuthProvider]
+  [CartProvider]
+  [SubscriptionProvider]
+  [TooltipProvider]
+}
+
+package "Layout" {
+  [Navbar]
+  [Main Content Area]
+  [Toaster]
+  [Sonner]
+}
+
+package "Routes" {
+  [Auth]
+  [Menu]
+  [Cart]
+  [Orders]
+  [Admin]
+  [SubscriptionPlans]
+  [TokensPage]
+  [Scanner]
+  [Delivery]
+  [Index]
+  [NotFound]
+}
+
+' Relationships
+AppComponent --> QueryClientProvider
+QueryClientProvider --> ThemeProvider
+ThemeProvider --> AuthProvider
+AuthProvider --> CartProvider
+CartProvider --> SubscriptionProvider
+SubscriptionProvider --> TooltipProvider
+TooltipProvider --> Navbar
+TooltipProvider --> Toaster
+TooltipProvider --> Sonner
+TooltipProvider --> MainContentArea
+
+MainContentArea --> Auth
+MainContentArea --> Menu
+MainContentArea --> Cart
+MainContentArea --> Orders
+MainContentArea --> Admin
+MainContentArea --> SubscriptionPlans
+MainContentArea --> TokensPage
+MainContentArea --> Scanner
+MainContentArea --> Delivery
+MainContentArea --> Index
+MainContentArea --> NotFound
+
+' Protected Routes
+Cart ..> Auth : ProtectedRoute
+Orders ..> Auth : ProtectedRoute
+Admin ..> Auth : AdminRoute
+Admin ..> Admin : AdminCheck
+
+@enduml

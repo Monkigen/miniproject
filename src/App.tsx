@@ -23,6 +23,7 @@ import TokensPage from "@/pages/TokensPage";
 import Scanner from "@/pages/Scanner";
 import Admin from "@/pages/Admin";
 import Delivery from "@/pages/Delivery";
+import Home from "@/pages/Home";
 
 const queryClient = new QueryClient();
 
@@ -57,7 +58,7 @@ const AppRoutes = () => {
 
   return (
     <Routes>
-      <Route path="/auth" element={<Auth />} />
+      <Route path="/" element={<Home />} />
       <Route path="/menu" element={<Menu />} />
       <Route
         path="/cart"
@@ -87,7 +88,7 @@ const AppRoutes = () => {
       <Route path="/tokens" element={<TokensPage />} />
       <Route path="/scanner" element={<Scanner />} />
       <Route path="/delivery" element={<Delivery />} />
-      <Route path="/" element={<Index />} />
+      <Route path="/auth" element={<Auth />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
@@ -96,28 +97,28 @@ const AppRoutes = () => {
 const App = () => {
   return (
     <Router>
-      <QueryClientProvider client={queryClient}>
+  <QueryClientProvider client={queryClient}>
         <ThemeProvider>
-          <AuthProvider>
-            <CartProvider>
-              <SubscriptionProvider>
-                <TooltipProvider>
-                  <Toaster />
-                  <Sonner />
-                  <div className="min-h-screen flex flex-col">
-                    <Navbar />
-                    <main className="flex-grow">
+    <AuthProvider>
+      <CartProvider>
+        <SubscriptionProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+              <div className="min-h-screen flex flex-col">
+                <Navbar />
+                <main className="flex-grow">
                       <AppRoutes />
-                    </main>
-                  </div>
-                </TooltipProvider>
-              </SubscriptionProvider>
-            </CartProvider>
-          </AuthProvider>
+                </main>
+              </div>
+          </TooltipProvider>
+        </SubscriptionProvider>
+      </CartProvider>
+    </AuthProvider>
         </ThemeProvider>
-      </QueryClientProvider>
+  </QueryClientProvider>
     </Router>
-  );
+);
 };
 
 export default App;

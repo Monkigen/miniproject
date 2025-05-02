@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
-import { Menu, User, ShoppingBag, LogOut, LayoutDashboard, Coins, Utensils, Package, CreditCard } from "lucide-react";
+import { Menu, User, ShoppingBag, LogOut, LayoutDashboard, Coins, Utensils, Package, CreditCard, Home as HomeIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 const Navbar = () => {
@@ -30,14 +30,31 @@ const Navbar = () => {
   const navItems = isAdmin 
     ? [
         {
+          name: "Home",
+          href: "/",
+          icon: HomeIcon,
+        },
+        {
           name: "Dashboard",
           href: "/admin",
           icon: LayoutDashboard,
         },
       ]
     : isDeliveryPartner
-    ? [] // Empty array for delivery partners - no nav items
-    : [
+    ? [
+        {
+          name: "Home",
+          href: "/",
+          icon: HomeIcon,
+        }
+      ]
+    : currentUser
+    ? [
+        {
+          name: "Home",
+          href: "/",
+          icon: HomeIcon,
+        },
         {
           name: "Menu",
           href: "/menu",
@@ -52,6 +69,28 @@ const Navbar = () => {
           name: "Tokens",
           href: "/tokens",
           icon: Coins,
+        },
+        {
+          name: "Subscription",
+          href: "/subscription",
+          icon: CreditCard,
+        },
+      ]
+    : [
+        {
+          name: "Home",
+          href: "/",
+          icon: HomeIcon,
+        },
+        {
+          name: "Menu",
+          href: "/menu",
+          icon: Utensils,
+        },
+        {
+          name: "Orders",
+          href: "/orders",
+          icon: Package,
         },
         {
           name: "Subscription",
@@ -81,14 +120,14 @@ const Navbar = () => {
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`font-medium hover:text-campus-green transition-colors ${
+                  className={`font-medium hover:text-campus-green transition-colors flex flex-col items-center ${
                     location.pathname === item.href
                       ? "text-campus-green"
                       : "text-gray-700"
                   }`}
                 >
-                  <item.icon className="h-5 w-5 mr-2" />
-                  {item.name}
+                  <item.icon className="h-5 w-5 mb-1" />
+                  <span>{item.name}</span>
                 </Link>
               ))}
             </div>
@@ -128,7 +167,7 @@ const Navbar = () => {
                     {currentUser.displayName || currentUser.email}
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  {!isDeliveryPartner && !isAdmin && (
+                  {!isDeliveryPartner && !isAdmin && currentUser && (
                     <>
                       <DropdownMenuItem asChild>
                         <Link to="/tokens" className="flex items-center">
@@ -198,7 +237,7 @@ const Navbar = () => {
                           key={item.name}
                           to={item.href}
                           onClick={closeMobileMenu}
-                          className={`text-lg font-medium py-2 hover:text-campus-green transition-colors ${
+                          className={`text-lg font-medium py-2 hover:text-campus-green transition-colors flex items-center ${
                             location.pathname === item.href
                               ? "text-campus-green"
                               : "text-gray-700"

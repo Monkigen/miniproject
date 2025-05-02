@@ -41,11 +41,11 @@ const Index = () => {
               </Button>
             </Link>
             {!currentUser && (
-              <Link to="/auth">
+            <Link to="/auth">
                 <Button size="lg" variant="outline" className="bg-transparent text-white border-2 border-white hover:bg-white/10 px-8 py-6 text-lg">
-                  Sign Up Now
-                </Button>
-              </Link>
+                Sign Up Now
+              </Button>
+            </Link>
             )}
           </div>
         </div>

@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ShieldAlert, PackageCheck } from "lucide-react";
 import FileDeliveryScanner from "@/components/FileDeliveryScanner";
-import { useState, useEffect } from "react";
-import { doc, getDoc, updateDoc, increment, collection, query, where, getDocs } from "firebase/firestore";
+import { useState, useEffect, useCallback } from "react";
+import { doc, getDoc, updateDoc, increment, collection, query, where, getDocs, orderBy, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useToast } from "@/components/ui/use-toast";
 import { useSubscription } from "@/contexts/SubscriptionContext";
@@ -18,39 +18,138 @@ const Delivery = () => {
   const [completedOrders, setCompletedOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchCompletedOrders = async () => {
-      if (!currentUser) return;
+  const fetchCompletedOrders = useCallback(async () => {
+    if (!currentUser) return;
+    
+    try {
+      setLoading(true);
+      const ordersRef = collection(db, "orders");
       
-      try {
-        const ordersRef = collection(db, "orders");
-        const q = query(
-          ordersRef,
-          where("deliveryDetails.status", "==", "delivered"),
-          where("deliveryDetails.deliveryPartnerId", "==", currentUser.uid)
-        );
-        
-        const querySnapshot = await getDocs(q);
-        const orders = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        
-        setCompletedOrders(orders);
-      } catch (error) {
-        console.error("Error fetching completed orders:", error);
+      // Query for completed orders by this delivery partner
+      const q = query(
+        ordersRef,
+        where("deliveryDetails.deliveryPartnerId", "==", currentUser.uid),
+        where("deliveryDetails.status", "==", "delivered"),
+        orderBy("deliveryDetails.deliveredAt", "desc")
+      );
+      
+      const querySnapshot = await getDocs(q);
+      const orders = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      
+      setCompletedOrders(orders);
+    } catch (error: any) {
+      console.error("Error fetching completed orders:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch completed orders. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [currentUser, toast]);
+
+  useEffect(() => {
+    fetchCompletedOrders();
+  }, [fetchCompletedOrders]);
+
+  const handleScanSuccess = async (userId: string) => {
+    try {
+      setScanning(true);
+      
+      // Get user document
+      const userRef = doc(db, "users", userId);
+      const userDoc = await getDoc(userRef);
+      
+      if (!userDoc.exists()) {
         toast({
           title: "Error",
-          description: "Failed to fetch completed orders",
+          description: "User not found",
           variant: "destructive",
         });
-      } finally {
-        setLoading(false);
+        return;
       }
-    };
 
-    fetchCompletedOrders();
-  }, [currentUser, toast]);
+      const userData = userDoc.data();
+      
+      // Check if user has enough tokens
+      if (!userData.tokens || userData.tokens < 1) {
+        toast({
+          title: "Insufficient Tokens",
+          description: "The user doesn't have enough tokens for this delivery.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Find the user's active order
+      const ordersRef = collection(db, "orders");
+      const q = query(
+        ordersRef,
+        where("userId", "==", userId),
+        where("deliveryDetails.status", "!=", "delivered")
+      );
+      
+      const querySnapshot = await getDocs(q);
+      if (querySnapshot.empty) {
+        toast({
+          title: "No Active Order",
+          description: "No active order found for this user.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const orderDoc = querySnapshot.docs[0];
+      const orderData = orderDoc.data();
+
+      // Calculate total quantity
+      const totalQuantity = orderData.items.reduce((sum: number, item: any) => sum + item.quantity, 0);
+
+      // Deduct tokens
+      await updateDoc(userRef, {
+        tokens: increment(-totalQuantity)
+      });
+
+      const now = Timestamp.now();
+
+      // Update order status with more detailed information
+      await updateDoc(doc(db, "orders", orderDoc.id), {
+        "deliveryDetails": {
+          status: "delivered",
+          deliveredAt: now,
+          deliveryPartnerId: currentUser.uid,
+          deliveryPartnerName: currentUser.displayName || "Unknown",
+          deliveryPartnerEmail: currentUser.email
+        },
+        "trackingStatus": "delivered",
+        "tokenDeducted": true,
+        "tokensDeducted": totalQuantity,
+        "deliveryCompletedAt": now,
+        "lastUpdated": now
+      });
+
+      // Refresh completed orders
+      await fetchCompletedOrders();
+
+      toast({
+        title: "Success",
+        description: `Order delivered and ${totalQuantity} token${totalQuantity > 1 ? 's' : ''} deducted successfully`,
+      });
+    } catch (error: any) {
+      console.error("Error processing delivery:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to process delivery",
+        variant: "destructive",
+      });
+    } finally {
+      setScanning(false);
+    }
+  };
 
   if (!currentUser) {
     return (
@@ -97,73 +196,6 @@ const Delivery = () => {
     );
   }
 
-  const handleScanSuccess = async (userId: string) => {
-    try {
-      setScanning(true);
-      
-      // Get user document
-      const userRef = doc(db, "users", userId);
-      const userDoc = await getDoc(userRef);
-      
-      if (!userDoc.exists()) {
-        throw new Error("User not found");
-      }
-
-      const userData = userDoc.data();
-      
-      // Check if user has enough tokens
-      if (!userData.tokens || userData.tokens < 1) {
-        toast({
-          title: "Insufficient Tokens",
-          description: "The user doesn't have enough tokens for this delivery.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Deduct one token
-      await updateDoc(userRef, {
-        tokens: increment(-1)
-      });
-
-      // Use token from subscription context
-      const tokenUsed = await useToken();
-      if (!tokenUsed) {
-        throw new Error("Failed to deduct token");
-      }
-
-      toast({
-        title: "Delivery Confirmed",
-        description: "One token has been deducted from the user's account.",
-      });
-
-      // Refresh completed orders
-      const ordersRef = collection(db, "orders");
-      const q = query(
-        ordersRef,
-        where("deliveryDetails.status", "==", "delivered"),
-        where("deliveryDetails.deliveryPartnerId", "==", currentUser.uid)
-      );
-      
-      const querySnapshot = await getDocs(q);
-      const orders = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      
-      setCompletedOrders(orders);
-    } catch (error: any) {
-      console.error("Error processing delivery:", error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to process delivery",
-        variant: "destructive",
-      });
-    } finally {
-      setScanning(false);
-    }
-  };
-
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -179,7 +211,10 @@ const Delivery = () => {
                 <p>Processing delivery...</p>
               </div>
             ) : (
-              <FileDeliveryScanner onScanSuccess={handleScanSuccess} />
+              <FileDeliveryScanner 
+                onScanSuccess={handleScanSuccess}
+                onOrderCompleted={fetchCompletedOrders}
+              />
             )}
           </CardContent>
         </Card>
@@ -208,7 +243,10 @@ const Delivery = () => {
                       <div>
                         <p className="font-medium">Order #{order.id.slice(-6)}</p>
                         <p className="text-sm text-gray-500">
-                          Delivered: {new Date(order.deliveryDetails.deliveredAt).toLocaleString()}
+                          Delivered: {order.deliveryDetails.deliveredAt.toDate().toLocaleString()}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Tokens: {order.tokensDeducted}
                         </p>
                       </div>
                       <div className="text-right">

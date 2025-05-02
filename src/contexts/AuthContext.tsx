@@ -69,7 +69,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             navigate("/delivery");
           }
         } else {
-          setCurrentUser(user);
+      setCurrentUser(user);
           setIsAdmin(false);
           setIsDeliveryPartner(false);
         }
