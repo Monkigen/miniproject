@@ -1,72 +1,55 @@
 import React, { useState } from "react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useAuth } from "@/contexts/AuthContext";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { doc, collection, addDoc } from "firebase/firestore";
+import { addDoc, collection } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Star } from "lucide-react";
 
 interface FeedbackFormProps {
-  onClose: () => void;
+  onClose?: () => void;
 }
 
 const FeedbackForm: React.FC<FeedbackFormProps> = ({ onClose }) => {
-  const { currentUser } = useAuth();
-  const { toast } = useToast();
-  const [rating, setRating] = useState<number>(0);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [feedback, setFeedback] = useState("");
-  const [name, setName] = useState(currentUser?.displayName || "");
+  const [rating, setRating] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!feedback.trim()) {
-      toast({
-        title: "Feedback required",
-        description: "Please provide your feedback before submitting.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (rating === 0) {
-      toast({
-        title: "Rating required",
-        description: "Please select a rating before submitting.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsSubmitting(true);
 
     try {
-      const feedbackData = {
-        userId: currentUser?.uid || "anonymous",
-        name: name || "Anonymous",
-        email: currentUser?.email || "anonymous@example.com",
-        rating,
+      await addDoc(collection(db, "feedback"), {
+        name,
+        email,
         feedback,
-        createdAt: new Date().toISOString(),
+        rating,
+        timestamp: new Date(),
         status: "pending" // pending, reviewed, resolved
-      };
-
-      // Add feedback to the 'feedback' collection
-      await addDoc(collection(db, "feedback"), feedbackData);
+      });
 
       toast({
         title: "Thank you for your feedback!",
         description: "Your feedback has been submitted successfully.",
       });
 
-      onClose();
+      // Reset form
+      setName("");
+      setEmail("");
+      setFeedback("");
+      setRating(0);
+      
+      // Call onClose if provided
+      if (onClose) {
+        onClose();
+      }
     } catch (error) {
-      console.error("Error submitting feedback:", error);
       toast({
         title: "Error",
         description: "Failed to submit feedback. Please try again.",
@@ -78,28 +61,37 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onClose }) => {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle>Share Your Experience</CardTitle>
-        <CardDescription>
-          Help us improve by sharing your thoughts about our service
-        </CardDescription>
-      </CardHeader>
-      <form onSubmit={handleSubmit}>
-        <CardContent className="space-y-4">
+    <Card className="w-full max-w-2xl mx-auto bg-white/10 backdrop-blur-sm border-0">
+      <CardContent className="p-8">
+        <h3 className="text-2xl font-semibold text-white mb-6">Share Your Feedback</h3>
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="name">Your Name</Label>
+            <label htmlFor="name" className="text-white">Name</label>
             <Input
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Enter your name"
               required
+              className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
+              placeholder="Your name"
             />
           </div>
 
           <div className="space-y-2">
-            <Label>Rating</Label>
+            <label htmlFor="email" className="text-white">Email</label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="bg-white/20 border-white/30 text-white placeholder:text-white/50"
+              placeholder="Your email"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-white">Rating</label>
             <div className="flex gap-2">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
@@ -109,12 +101,11 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onClose }) => {
                   className="focus:outline-none"
                 >
                   <Star
-                    size={24}
-                    className={`${
+                    className={`h-8 w-8 ${
                       star <= rating
                         ? "text-yellow-400 fill-yellow-400"
-                        : "text-gray-300"
-                    } transition-colors duration-200`}
+                        : "text-white/30"
+                    }`}
                   />
                 </button>
               ))}
@@ -122,31 +113,26 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({ onClose }) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="feedback">Your Feedback</Label>
+            <label htmlFor="feedback" className="text-white">Your Feedback</label>
             <Textarea
               id="feedback"
               value={feedback}
               onChange={(e) => setFeedback(e.target.value)}
-              placeholder="Tell us about your experience..."
-              className="min-h-[100px]"
               required
+              className="bg-white/20 border-white/30 text-white placeholder:text-white/50 min-h-[120px]"
+              placeholder="Share your experience with us..."
             />
           </div>
-        </CardContent>
-        <CardFooter className="flex justify-end gap-2">
+
           <Button
-            type="button"
-            variant="outline"
-            onClick={onClose}
+            type="submit"
             disabled={isSubmitting}
+            className="w-full bg-white text-[#4CAE4F] hover:bg-gray-100 py-6 text-lg"
           >
-            Cancel
-          </Button>
-          <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? "Submitting..." : "Submit Feedback"}
           </Button>
-        </CardFooter>
-      </form>
+        </form>
+      </CardContent>
     </Card>
   );
 };

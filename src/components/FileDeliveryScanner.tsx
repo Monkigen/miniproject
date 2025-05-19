@@ -37,7 +37,7 @@ const FileDeliveryScanner: React.FC<FileDeliveryScannerProps> = ({ onScanSuccess
       setProcessing(true);
       const reader = new FileReader();
       
-      reader.onload = async (e) => {
+      reader.onload = (e) => {
         try {
           const img = new Image();
           img.src = e.target?.result as string;
@@ -47,6 +47,8 @@ const FileDeliveryScanner: React.FC<FileDeliveryScannerProps> = ({ onScanSuccess
               // Create canvas to process image
               const canvas = document.createElement('canvas');
               const context = canvas.getContext('2d');
+              
+              // Set canvas size to match image
               canvas.width = img.width;
               canvas.height = img.height;
               
@@ -60,15 +62,52 @@ const FileDeliveryScanner: React.FC<FileDeliveryScannerProps> = ({ onScanSuccess
               // Get image data
               const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
               
-              // Scan QR code
-              const code = jsQR(imageData.data, imageData.width, imageData.height);
+              // Try different scales for better QR code detection
+              const scales = [1, 1.5, 2];
+              let code = null;
+              
+              for (const scale of scales) {
+                // Create a scaled canvas
+                const scaledCanvas = document.createElement('canvas');
+                const scaledContext = scaledCanvas.getContext('2d');
+                
+                if (!scaledContext) continue;
+                
+                // Set scaled dimensions
+                scaledCanvas.width = canvas.width * scale;
+                scaledCanvas.height = canvas.height * scale;
+                
+                // Draw scaled image
+                scaledContext.drawImage(img, 0, 0, scaledCanvas.width, scaledCanvas.height);
+                
+                // Get scaled image data
+                const scaledImageData = scaledContext.getImageData(0, 0, scaledCanvas.width, scaledCanvas.height);
+                
+                // Try to detect QR code
+                code = jsQR(scaledImageData.data, scaledImageData.width, scaledImageData.height, {
+                  inversionAttempts: "dontInvert",
+                });
+                
+                if (code) break;
+              }
+              
+              if (!code) {
+                // If QR code not found, try with image enhancement
+                context.filter = 'contrast(1.2) brightness(1.1)';
+                context.drawImage(img, 0, 0, img.width, img.height);
+                const enhancedImageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                code = jsQR(enhancedImageData.data, enhancedImageData.width, enhancedImageData.height, {
+                  inversionAttempts: "dontInvert",
+                });
+              }
               
               if (!code) {
                 toast({
                   title: "QR Code Not Found",
-                  description: "Please make sure the QR code is clear and well-lit in the image.",
+                  description: "Please make sure the QR code is clear, well-lit, and not blurry in the image.",
                   variant: "destructive",
                 });
+                setProcessing(false);
                 return;
               }
 
@@ -79,18 +118,20 @@ const FileDeliveryScanner: React.FC<FileDeliveryScannerProps> = ({ onScanSuccess
               } catch (error) {
                 toast({
                   title: "Invalid QR Code",
-                  description: "The QR code format is not valid.",
+                  description: "The QR code format is not valid. Please make sure you're scanning the correct QR code.",
                   variant: "destructive",
                 });
+                setProcessing(false);
                 return;
               }
               
               if (qrData.type !== "campus-bite-order") {
                 toast({
                   title: "Invalid QR Code",
-                  description: "This QR code is not from Campus Kitchen.",
+                  description: "This QR code is not from Campus Kitchen. Please scan the correct QR code.",
                   variant: "destructive",
                 });
+                setProcessing(false);
                 return;
               }
 
@@ -103,6 +144,7 @@ const FileDeliveryScanner: React.FC<FileDeliveryScannerProps> = ({ onScanSuccess
                   description: "The order associated with this QR code could not be found.",
                   variant: "destructive",
                 });
+                setProcessing(false);
                 return;
               }
 
@@ -114,6 +156,7 @@ const FileDeliveryScanner: React.FC<FileDeliveryScannerProps> = ({ onScanSuccess
                   description: "This order has already been marked as delivered.",
                   variant: "destructive",
                 });
+                setProcessing(false);
                 return;
               }
 
@@ -127,6 +170,7 @@ const FileDeliveryScanner: React.FC<FileDeliveryScannerProps> = ({ onScanSuccess
                   description: "The user associated with this order could not be found.",
                   variant: "destructive",
                 });
+                setProcessing(false);
                 return;
               }
 
@@ -142,6 +186,7 @@ const FileDeliveryScanner: React.FC<FileDeliveryScannerProps> = ({ onScanSuccess
                   description: `User has insufficient tokens. Required: ${totalQuantity}, Available: ${userData.tokens}`,
                   variant: "destructive",
                 });
+                setProcessing(false);
                 return;
               }
 
@@ -182,6 +227,8 @@ const FileDeliveryScanner: React.FC<FileDeliveryScannerProps> = ({ onScanSuccess
                 description: error.message || "Failed to process QR code",
                 variant: "destructive",
               });
+            } finally {
+              setProcessing(false);
             }
           };
 
@@ -191,6 +238,7 @@ const FileDeliveryScanner: React.FC<FileDeliveryScannerProps> = ({ onScanSuccess
               description: "Failed to load the image. Please try again.",
               variant: "destructive",
             });
+            setProcessing(false);
           };
         } catch (error: any) {
           console.error("Error reading file:", error);
@@ -199,7 +247,6 @@ const FileDeliveryScanner: React.FC<FileDeliveryScannerProps> = ({ onScanSuccess
             description: "Failed to read the file. Please try again.",
             variant: "destructive",
           });
-        } finally {
           setProcessing(false);
         }
       };

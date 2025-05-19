@@ -87,13 +87,13 @@ const TokensPage = () => {
           <CardContent>
             <div className="flex items-center justify-center py-8">
               <div className="text-center">
-              <div className="text-6xl font-bold text-campus-green">{tokens}</div>
-                <div className="text-xl mb-2">tokens</div>
+                <div className="text-6xl font-bold text-campus-green">{tokens}</div>
+                <div className="text-xl mb-2">tokens available</div>
                 {subscription?.tokens && (
-                  <div className="text-sm text-gray-600">
-                    <p>Base tokens: {subscription.tokens}</p>
-                    <p>Additional tokens: {tokens - subscription.tokens}</p>
-                    <p className="font-medium mt-1">Total: {tokens}</p>
+                  <div className="text-sm text-gray-600 space-y-1">
+                    <p className="font-medium">Total tokens: 8</p>
+                    <p>Tokens available: {tokens}</p>
+                    <p>Tokens used: {8 - tokens}</p>
                   </div>
                 )}
               </div>

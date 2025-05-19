@@ -1,5 +1,5 @@
 @startuml
-title Campus Bite Kitchen - App Architecture
+title Campus Kitchen - App Architecture
 
 package "App" {
   [App] as AppComponent

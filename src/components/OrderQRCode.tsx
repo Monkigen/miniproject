@@ -126,6 +126,9 @@ const OrderQRCode: React.FC<OrderQRCodeProps> = ({ order, onClose }) => {
   const userDetails = order.userDetails || { name: "N/A", email: "N/A" };
   const deliveryDetails: DeliveryDetails = order.deliveryDetails || { status: "pending" };
   
+  // Calculate total quantity of all items
+  const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
+  
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <Card className="w-full max-w-md mx-4">
@@ -160,8 +163,7 @@ const OrderQRCode: React.FC<OrderQRCodeProps> = ({ order, onClose }) => {
             <div className="text-sm space-y-1">
               <p>Order ID: {order.id}</p>
               <p>Status: {order.trackingStatus || "Pending"}</p>
-              <p>Total Items: {items.length}</p>
-              <p>Total Amount: ${total.toFixed(2)}</p>
+              <p>Total Items: {totalQuantity}</p>
               <p>Customer: {userDetails.name}</p>
               <p>Email: {userDetails.email}</p>
               {userDetails.phone && <p>Phone: {userDetails.phone}</p>}

@@ -9,6 +9,9 @@ import {
   Dialog,
   DialogContent,
   DialogTrigger,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 
 const Index = () => {
@@ -168,7 +171,17 @@ const Index = () => {
                   Share Your Experience
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
+              <DialogContent 
+                className="sm:max-w-[425px]"
+                title="Order Details"
+                description="Review your order information before proceeding"
+              >
+                <DialogHeader>
+                  <DialogTitle>Order Details</DialogTitle>
+                  <DialogDescription>
+                    Review your order information before proceeding
+                  </DialogDescription>
+                </DialogHeader>
                 <FeedbackForm onClose={() => setShowFeedbackForm(false)} />
               </DialogContent>
             </Dialog>

@@ -154,7 +154,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   // Refresh subscription data
   const refreshSubscription = async () => {
-    if (!currentUser) {
+    if (!currentUser || !currentUser.uid) {
       setSubscription(null);
       setTokens(0);
       setLoading(false);
@@ -209,6 +209,11 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
       }
     } catch (error) {
       console.error("Error fetching subscription:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch subscription data. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }

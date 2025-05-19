@@ -1,31 +1,26 @@
 import React from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
-import Navbar from "@/components/Navbar";
 import { useAuth } from "@/contexts/AuthContext";
-import { ThemeProvider } from "@/contexts/ThemeContext";
+import Navbar from "@/components/Navbar";
 
-import Index from "@/pages/Index";
+// Import pages
+import Home from "@/pages/Home";
 import Menu from "@/pages/Menu";
 import Cart from "@/pages/Cart";
-import Orders from "@/pages/Orders";
 import Auth from "@/pages/Auth";
-import NotFound from "@/pages/NotFound";
-import SubscriptionPlans from "@/pages/Subscription";
-import TokensPage from "@/pages/TokensPage";
-import Scanner from "@/pages/Scanner";
+import Profile from "@/pages/Profile";
+import Orders from "@/pages/Orders";
+import Subscription from "@/pages/Subscription";
 import Admin from "@/pages/Admin";
 import Delivery from "@/pages/Delivery";
-import Home from "@/pages/Home";
-
-const queryClient = new QueryClient();
+import DeliveryScanner from "@/pages/DeliveryScanner";
+import CompletedDeliveries from "@/pages/CompletedDeliveries";
+import TokensPage from "@/pages/TokensPage";
+import NotFound from "@/pages/NotFound";
 
 // Protected Route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -48,77 +43,89 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-const AppRoutes = () => {
-  const { currentUser, isAdmin } = useAuth();
-
-  // Redirect admin users to admin page if they're on the home page
-  if (currentUser && isAdmin && window.location.pathname === "/") {
-    return <Navigate to="/admin" />;
+// Delivery Route component
+const DeliveryRoute = ({ children }: { children: React.ReactNode }) => {
+  const { currentUser, isDeliveryPartner } = useAuth();
+  if (!currentUser) {
+    return <Navigate to="/auth" />;
   }
+  if (!isDeliveryPartner) {
+    return <Navigate to="/" />;
+  }
+  return <>{children}</>;
+};
 
+// Layout component
+const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/menu" element={<Menu />} />
-      <Route
-        path="/cart"
-        element={
-          <ProtectedRoute>
-            <Cart />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/orders"
-        element={
-          <ProtectedRoute>
-            <Orders />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin"
-        element={
-          <AdminRoute>
-            <Admin />
-          </AdminRoute>
-        }
-      />
-      <Route path="/subscription" element={<SubscriptionPlans />} />
-      <Route path="/tokens" element={<TokensPage />} />
-      <Route path="/scanner" element={<Scanner />} />
-      <Route path="/delivery" element={<Delivery />} />
-      <Route path="/auth" element={<Auth />} />
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+      <main className="flex-grow">
+        {children}
+      </main>
+    </div>
   );
 };
 
-const App = () => {
+function App() {
   return (
-    <Router>
-  <QueryClientProvider client={queryClient}>
-        <ThemeProvider>
     <AuthProvider>
       <CartProvider>
         <SubscriptionProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-              <div className="min-h-screen flex flex-col">
-                <Navbar />
-                <main className="flex-grow">
-                      <AppRoutes />
-                </main>
-              </div>
-          </TooltipProvider>
+          <Layout>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/menu" element={<Menu />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/subscription" element={<Subscription />} />
+              
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              } />
+              <Route path="/orders" element={
+                <ProtectedRoute>
+                  <Orders />
+                </ProtectedRoute>
+              } />
+              <Route path="/tokens" element={
+                <ProtectedRoute>
+                  <TokensPage />
+                </ProtectedRoute>
+              } />
+
+              <Route path="/admin" element={
+                <AdminRoute>
+                  <Admin />
+                </AdminRoute>
+              } />
+
+              <Route path="/delivery" element={
+                <DeliveryRoute>
+                  <Delivery />
+                </DeliveryRoute>
+              } />
+              <Route path="/delivery/scanner" element={
+                <DeliveryRoute>
+                  <DeliveryScanner />
+                </DeliveryRoute>
+              } />
+              <Route path="/delivery/completed" element={
+                <DeliveryRoute>
+                  <CompletedDeliveries />
+                </DeliveryRoute>
+              } />
+
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Layout>
+          <Toaster />
         </SubscriptionProvider>
       </CartProvider>
     </AuthProvider>
-        </ThemeProvider>
-  </QueryClientProvider>
-    </Router>
-);
-};
+  );
+}
 
 export default App;

@@ -23,6 +23,7 @@ import {
   Filter,
   ArrowUpDown,
   Search,
+  Trash2,
 } from "lucide-react";
 import {
   Select,
@@ -32,9 +33,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { collection, query, where, onSnapshot, orderBy, getDocs, Unsubscribe, Timestamp, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, query, where, onSnapshot, orderBy, getDocs, Unsubscribe, Timestamp, addDoc, serverTimestamp, deleteDoc, doc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useToast } from "@/components/ui/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface User {
   id: string;
@@ -88,6 +99,8 @@ const Admin = () => {
   const [sortBy, setSortBy] = useState<string>("newest");
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<{ type: 'user' | 'order' | 'activity', id: string } | null>(null);
 
   // First effect: Check admin access
   useEffect(() => {
@@ -171,7 +184,7 @@ const Admin = () => {
           collection(db, "orders"),
           (snapshot) => {
             const ordersData = snapshot.docs.map(doc => ({
-              id: doc.id,
+              id: doc.id.toString(),
               ...doc.data()
             })) as Order[];
             setOrders(ordersData);
@@ -287,6 +300,37 @@ const Admin = () => {
     };
   }, [users, orders, activities, filter, sortBy, searchQuery]);
 
+  const handleDelete = async () => {
+    if (!itemToDelete) return;
+
+    try {
+      const collectionName = itemToDelete.type === 'user' ? 'users' : 
+                           itemToDelete.type === 'order' ? 'orders' : 'activities';
+      
+      await deleteDoc(doc(db, collectionName, itemToDelete.id));
+      
+      toast({
+        title: "Success",
+        description: `${itemToDelete.type.charAt(0).toUpperCase() + itemToDelete.type.slice(1)} deleted successfully.`,
+      });
+    } catch (error) {
+      console.error(`Error deleting ${itemToDelete.type}:`, error);
+      toast({
+        title: "Error",
+        description: `Failed to delete ${itemToDelete.type}. Please try again.`,
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteDialogOpen(false);
+      setItemToDelete(null);
+    }
+  };
+
+  const confirmDelete = (type: 'user' | 'order' | 'activity', id: string) => {
+    setItemToDelete({ type, id });
+    setDeleteDialogOpen(true);
+  };
+
   if (initializing) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -362,51 +406,12 @@ const Admin = () => {
         </div>
       </div>
 
-      <Tabs defaultValue="overview" className="space-y-4">
+      <Tabs defaultValue="users" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="users">Users ({filteredAndSortedData.users.length})</TabsTrigger>
           <TabsTrigger value="orders">Orders ({filteredAndSortedData.orders.length})</TabsTrigger>
           <TabsTrigger value="activities">Activities ({filteredAndSortedData.activities.length})</TabsTrigger>
         </TabsList>
-
-        <TabsContent value="overview">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  Total Users
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold">{filteredAndSortedData.users.length}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <ShoppingBag className="h-5 w-5" />
-                  Total Orders
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold">{filteredAndSortedData.orders.length}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Clock className="h-5 w-5" />
-                  Recent Activities
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold">{filteredAndSortedData.activities.length}</p>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
 
         <TabsContent value="users">
           <Card>
@@ -439,6 +444,14 @@ const Admin = () => {
                         <p className="text-sm text-gray-500">
                           Joined: {formatDate(user.createdAt)}
                         </p>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => confirmDelete('user', user.id)}
+                          disabled={user.role === "admin"}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
                   ))}
@@ -470,12 +483,21 @@ const Admin = () => {
                     <div key={order.id} className="p-4 border rounded-lg">
                       <div className="flex items-center justify-between mb-2">
                         <div>
-                          <p className="font-medium">Order #{order.id.slice(-8)}</p>
+                          <p className="font-medium">Order #{typeof order.id === 'string' ? order.id.slice(-8) : order.id}</p>
                           <p className="text-sm text-gray-500">
                             {order.userDetails?.name || "Unknown User"}
                           </p>
                         </div>
-                        <Badge>{order.trackingStatus || "Pending"}</Badge>
+                        <div className="flex items-center gap-4">
+                          <Badge>{order.trackingStatus || "Pending"}</Badge>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => confirmDelete('order', order.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                       <div className="text-sm text-gray-500">
                         <p>Items: {order.items?.length || 0}</p>
@@ -517,9 +539,18 @@ const Admin = () => {
                             {activity.userDetails?.name || "Unknown User"}
                           </p>
                         </div>
-                        <p className="text-sm text-gray-500">
-                          {formatDate(activity.timestamp)}
-                        </p>
+                        <div className="flex items-center gap-4">
+                          <p className="text-sm text-gray-500">
+                            {formatDate(activity.timestamp)}
+                          </p>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => confirmDelete('activity', activity.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                       <p className="text-sm">{activity.details}</p>
                     </div>
@@ -530,6 +561,23 @@ const Admin = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the {itemToDelete?.type}.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

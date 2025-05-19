@@ -2,45 +2,122 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ShieldAlert, PackageCheck } from "lucide-react";
+import { ShieldAlert, PackageCheck, Calendar, Clock } from "lucide-react";
 import FileDeliveryScanner from "@/components/FileDeliveryScanner";
-import { useState, useEffect, useCallback } from "react";
-import { doc, getDoc, updateDoc, increment, collection, query, where, getDocs, orderBy, Timestamp } from "firebase/firestore";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { doc, getDoc, updateDoc, increment, collection, query, where, getDocs, orderBy, Timestamp, limit, startAfter } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useToast } from "@/components/ui/use-toast";
 import { useSubscription } from "@/contexts/SubscriptionContext";
+
+// Define the order type
+interface Order {
+  id: string;
+  deliveryDetails?: {
+    status?: string;
+    deliveredAt?: Timestamp;
+    deliveryPartnerId?: string;
+    deliveryPartnerName?: string;
+    deliveryPartnerEmail?: string;
+  };
+  tokensDeducted?: number;
+  total?: number;
+  items?: any[];
+  userId?: string;
+  customerName?: string;
+  customerEmail?: string;
+  orderNumber?: string;
+  createdAt?: Timestamp;
+}
 
 const Delivery = () => {
   const { currentUser } = useAuth();
   const { toast } = useToast();
   const [scanning, setScanning] = useState(false);
   const { useToken } = useSubscription();
-  const [completedOrders, setCompletedOrders] = useState<any[]>([]);
+  const [completedOrders, setCompletedOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [lastVisible, setLastVisible] = useState<any>(null);
+  const [hasMore, setHasMore] = useState(true);
+  const ORDERS_PER_PAGE = 10;
+  const isFetching = useRef(false);
+  const mounted = useRef(true);
 
-  const fetchCompletedOrders = useCallback(async () => {
-    if (!currentUser) return;
+  const fetchCompletedOrders = useCallback(async (isInitial = false) => {
+    if (!currentUser || isFetching.current || !mounted.current) return;
     
     try {
+      isFetching.current = true;
       setLoading(true);
       const ordersRef = collection(db, "orders");
       
-      // Query for completed orders by this delivery partner
-      const q = query(
+      // Simplified query that only uses deliveryPartnerId
+      let q = query(
         ordersRef,
         where("deliveryDetails.deliveryPartnerId", "==", currentUser.uid),
-        where("deliveryDetails.status", "==", "delivered"),
-        orderBy("deliveryDetails.deliveredAt", "desc")
+        limit(ORDERS_PER_PAGE)
       );
+
+      // If not initial load and we have a last visible document, start after it
+      if (!isInitial && lastVisible) {
+        q = query(
+          ordersRef,
+          where("deliveryDetails.deliveryPartnerId", "==", currentUser.uid),
+          startAfter(lastVisible),
+          limit(ORDERS_PER_PAGE)
+        );
+      }
       
       const querySnapshot = await getDocs(q);
-      const orders = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
       
-      setCompletedOrders(orders);
+      if (!mounted.current) return;
+
+      // Update last visible document
+      const lastDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
+      setLastVisible(lastDoc);
+      
+      // Check if there are more documents
+      setHasMore(querySnapshot.docs.length === ORDERS_PER_PAGE);
+      
+      // Filter and sort completed orders on the client side
+      const newOrders = querySnapshot.docs
+        .map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        } as Order))
+        .filter(order => order.deliveryDetails?.status === "delivered")
+        .sort((a, b) => {
+          const dateA = a.deliveryDetails?.deliveredAt?.toDate() || new Date(0);
+          const dateB = b.deliveryDetails?.deliveredAt?.toDate() || new Date(0);
+          return dateB.getTime() - dateA.getTime();
+        });
+      
+      if (newOrders.length > 0) {
+        console.log("Fetched new orders:", newOrders);
+        
+        // Update completed orders
+        if (isInitial) {
+          setCompletedOrders(newOrders);
+        } else {
+          setCompletedOrders(prev => {
+            // Combine previous and new orders, removing duplicates
+            const combined = [...prev, ...newOrders];
+            const uniqueOrders = Array.from(
+              new Map(combined.map(order => [order.id, order])).values()
+            );
+            return uniqueOrders.sort((a, b) => {
+              const dateA = a.deliveryDetails?.deliveredAt?.toDate() || new Date(0);
+              const dateB = b.deliveryDetails?.deliveredAt?.toDate() || new Date(0);
+              return dateB.getTime() - dateA.getTime();
+            });
+          });
+        }
+      } else if (isInitial) {
+        setCompletedOrders([]);
+      }
     } catch (error: any) {
+      if (!mounted.current) return;
+      
       console.error("Error fetching completed orders:", error);
       toast({
         title: "Error",
@@ -48,13 +125,34 @@ const Delivery = () => {
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      if (mounted.current) {
+        setLoading(false);
+        isFetching.current = false;
+      }
     }
-  }, [currentUser, toast]);
+  }, [currentUser, toast, lastVisible]);
+
+  // Load more orders
+  const loadMoreOrders = useCallback(() => {
+    if (!loading && hasMore && !isFetching.current) {
+      fetchCompletedOrders(false);
+    }
+  }, [loading, hasMore, fetchCompletedOrders]);
 
   useEffect(() => {
-    fetchCompletedOrders();
-  }, [fetchCompletedOrders]);
+    mounted.current = true;
+    
+    // Reset state when component mounts
+    setCompletedOrders([]);
+    setLastVisible(null);
+    setHasMore(true);
+    fetchCompletedOrders(true);
+
+    return () => {
+      mounted.current = false;
+      isFetching.current = false;
+    };
+  }, [currentUser?.uid]);
 
   const handleScanSuccess = async (userId: string) => {
     try {
@@ -85,16 +183,23 @@ const Delivery = () => {
         return;
       }
 
-      // Find the user's active order
+      // Find the user's active order - Simplified query
       const ordersRef = collection(db, "orders");
       const q = query(
         ordersRef,
         where("userId", "==", userId),
-        where("deliveryDetails.status", "!=", "delivered")
+        limit(1)
       );
       
       const querySnapshot = await getDocs(q);
-      if (querySnapshot.empty) {
+      const activeOrders = querySnapshot.docs
+        .map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        } as Order))
+        .filter(order => order.deliveryDetails?.status !== "delivered");
+
+      if (activeOrders.length === 0) {
         toast({
           title: "No Active Order",
           description: "No active order found for this user.",
@@ -117,7 +222,7 @@ const Delivery = () => {
       const now = Timestamp.now();
 
       // Update order status with more detailed information
-      await updateDoc(doc(db, "orders", orderDoc.id), {
+      const updatedOrderData = {
         "deliveryDetails": {
           status: "delivered",
           deliveredAt: now,
@@ -129,11 +234,50 @@ const Delivery = () => {
         "tokenDeducted": true,
         "tokensDeducted": totalQuantity,
         "deliveryCompletedAt": now,
-        "lastUpdated": now
-      });
+        "lastUpdated": now,
+        "customerName": userData.displayName || "Unknown",
+        "customerEmail": userData.email,
+        "orderNumber": `ORD-${orderDoc.id.slice(-6).toUpperCase()}`,
+        "createdAt": orderData.createdAt || now
+      };
 
-      // Refresh completed orders
-      await fetchCompletedOrders();
+      // Update the order in Firestore
+      await updateDoc(doc(db, "orders", orderDoc.id), updatedOrderData);
+
+      // Reset pagination state
+      setLastVisible(null);
+      setHasMore(true);
+
+      // Fetch fresh data from the database
+      const completedOrdersQuery = query(
+        ordersRef,
+        where("deliveryDetails.deliveryPartnerId", "==", currentUser.uid),
+        limit(ORDERS_PER_PAGE)
+      );
+
+      const completedOrdersSnapshot = await getDocs(completedOrdersQuery);
+      
+      const newCompletedOrders = completedOrdersSnapshot.docs
+        .map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        } as Order))
+        .filter(order => order.deliveryDetails?.status === "delivered")
+        .sort((a, b) => {
+          const dateA = a.deliveryDetails?.deliveredAt?.toDate() || new Date(0);
+          const dateB = b.deliveryDetails?.deliveredAt?.toDate() || new Date(0);
+          return dateB.getTime() - dateA.getTime();
+        });
+
+      // Update the completed orders list with fresh data
+      setCompletedOrders(newCompletedOrders);
+
+      // Update last visible document for pagination
+      const lastDoc = completedOrdersSnapshot.docs[completedOrdersSnapshot.docs.length - 1];
+      setLastVisible(lastDoc);
+      
+      // Update hasMore flag
+      setHasMore(completedOrdersSnapshot.docs.length === ORDERS_PER_PAGE);
 
       toast({
         title: "Success",
@@ -225,7 +369,7 @@ const Delivery = () => {
             <CardTitle className="text-center">Completed Deliveries</CardTitle>
           </CardHeader>
           <CardContent>
-            {loading ? (
+            {loading && completedOrders.length === 0 ? (
               <div className="text-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-campus-green mx-auto mb-4" />
                 <p>Loading orders...</p>
@@ -238,24 +382,62 @@ const Delivery = () => {
             ) : (
               <div className="space-y-4">
                 {completedOrders.map((order) => (
-                  <Card key={order.id} className="p-4">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <p className="font-medium">Order #{order.id.slice(-6)}</p>
-                        <p className="text-sm text-gray-500">
-                          Delivered: {order.deliveryDetails.deliveredAt.toDate().toLocaleString()}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          Tokens: {order.tokensDeducted}
-                        </p>
+                  <Card key={order.id} className="p-4 hover:shadow-md transition-shadow">
+                    <div className="flex justify-between items-start">
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <p className="font-medium">#{order.orderNumber || order.id.slice(-6)}</p>
+                          <span className="text-xs bg-campus-green/10 text-campus-green px-2 py-1 rounded">
+                            {order.tokensDeducted || 0} Tokens
+                          </span>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-sm text-gray-600">
+                            {order.customerName || 'Unknown Customer'}
+                          </p>
+                          <div className="flex items-center space-x-2 text-xs text-gray-500">
+                            <Calendar className="h-3 w-3" />
+                            <span>
+                              {order.deliveryDetails?.deliveredAt?.toDate().toLocaleDateString() || 'N/A'}
+                            </span>
+                            <Clock className="h-3 w-3 ml-2" />
+                            <span>
+                              {order.deliveryDetails?.deliveredAt?.toDate().toLocaleTimeString() || 'N/A'}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-medium">${order.total.toFixed(2)}</p>
-                        <p className="text-xs text-gray-500">{order.items.length} items</p>
+                        <p className="text-sm font-medium text-gray-600">
+                          {order.items?.length || 0} Items
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Delivered by {order.deliveryDetails?.deliveryPartnerName || 'Unknown'}
+                        </p>
                       </div>
                     </div>
                   </Card>
                 ))}
+                
+                {/* Loading indicator */}
+                {loading && completedOrders.length > 0 && (
+                  <div className="text-center py-4">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-campus-green mx-auto" />
+                  </div>
+                )}
+                
+                {/* Load More Button */}
+                {hasMore && !loading && (
+                  <div className="text-center pt-4">
+                    <Button
+                      variant="outline"
+                      onClick={loadMoreOrders}
+                      className="w-full"
+                    >
+                      Load More
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </CardContent>

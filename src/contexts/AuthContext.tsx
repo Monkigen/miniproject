@@ -16,13 +16,13 @@ import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 
 interface UserData {
-  uid: string;
-  name: string;
-  email: string;
-  photoURL: string | null;
-  tokens: number;
-  role: string;
-  createdAt: string;
+  displayName?: string;
+  email?: string;
+  photoURL?: string;
+  phoneNumber?: string;
+  address?: string;
+  role?: "user" | "admin" | "delivery";
+  tokens?: number;
 }
 
 interface AuthContextProps {
@@ -130,8 +130,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const userDoc = await getDoc(doc(db, "users", result.user.uid));
       if (userDoc.exists()) {
         const userData = userDoc.data();
+        setCurrentUser({ ...result.user, ...userData });
         setIsAdmin(userData.role === "admin");
       } else {
+        setCurrentUser(result.user);
         setIsAdmin(false);
       }
       

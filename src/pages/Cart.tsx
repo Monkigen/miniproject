@@ -15,7 +15,7 @@ import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 const Cart = () => {
-  const { cart, clearCart } = useCart();
+  const { cart, clearCart, totalItems } = useCart();
   const { currentUser } = useAuth();
   const { tokens, canPlaceOrder } = useSubscription();
   const navigate = useNavigate();
@@ -163,79 +163,79 @@ const Cart = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex items-center gap-4 mb-8">
+    <div className="container mx-auto px-4 py-4 sm:py-6 md:py-8">
+      <div className="flex items-center gap-4 mb-4 sm:mb-6 md:mb-8">
         <Button variant="ghost" size="icon" asChild>
           <Link to="/menu">
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
-        <h1 className="text-3xl font-bold">Your Cart</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">Your Cart</h1>
       </div>
 
       {cart.length === 0 ? (
         <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <ShoppingCart className="h-12 w-12 text-gray-400 mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Your cart is empty</h2>
-            <p className="text-gray-600 mb-4">Add some delicious meals to your cart</p>
+          <CardContent className="flex flex-col items-center justify-center py-8 sm:py-12">
+            <ShoppingCart className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mb-3 sm:mb-4" />
+            <h2 className="text-lg sm:text-xl font-semibold mb-2">Your cart is empty</h2>
+            <p className="text-sm sm:text-base text-gray-600 mb-4 text-center">Add some delicious meals to your cart</p>
             <Button asChild>
               <Link to="/menu">Browse Menu</Link>
             </Button>
           </CardContent>
         </Card>
       ) : (
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+          <div className="md:col-span-2">
             <Card>
-              <CardHeader>
-                <CardTitle>Cart Items</CardTitle>
+              <CardHeader className="px-4 sm:px-6">
+                <CardTitle className="text-lg sm:text-xl">Cart Items</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
+              <CardContent className="px-4 sm:px-6">
+                <div className="space-y-3 sm:space-y-4">
                   {cart.map((item) => (
                     <CartItem key={item.id} item={item} />
                   ))}
                 </div>
               </CardContent>
             </Card>
-        </div>
+          </div>
 
-        <div>
-          <Card>
-            <CardHeader>
-              <CardTitle>Order Summary</CardTitle>
-            </CardHeader>
-              <CardContent className="space-y-4">
+          <div>
+            <Card className="sticky top-4">
+              <CardHeader className="px-4 sm:px-6">
+                <CardTitle className="text-lg sm:text-xl">Order Summary</CardTitle>
+              </CardHeader>
+              <CardContent className="px-4 sm:px-6 space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Total Items</span>
-                  <span className="font-semibold">{cart.length}</span>
+                  <span className="text-sm sm:text-base text-gray-600">Total Items</span>
+                  <span className="text-sm sm:text-base font-semibold">{totalItems}</span>
                 </div>
                 <Separator />
-                <div className="flex items-center gap-2 text-sm text-gray-600">
+                <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
                   <Coins className="h-4 w-4" />
                   <span>Available Tokens: {tokens}</span>
                 </div>
                 {tokens <= 0 && (
-                  <div className="flex items-center gap-2 text-sm text-red-500">
+                  <div className="flex items-center gap-2 text-xs sm:text-sm text-red-500">
                     <AlertCircle className="h-4 w-4" />
                     <span>No tokens available</span>
-                </div>
+                  </div>
                 )}
-            </CardContent>
-            <CardFooter>
-              <Button
-                  className="w-full" 
-                onClick={handleCheckout}
+              </CardContent>
+              <CardFooter className="px-4 sm:px-6">
+                <Button
+                  className="w-full text-sm sm:text-base" 
+                  onClick={handleCheckout}
                   disabled={!canPlaceOrder || processing}
-              >
+                >
                   {processing ? "Processing..." : "Place Order"}
-              </Button>
-            </CardFooter>
-          </Card>
-              </div>
-            </div>
-          )}
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
