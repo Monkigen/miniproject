@@ -19,6 +19,7 @@ import Admin from "@/pages/Admin";
 import Delivery from "@/pages/Delivery";
 import DeliveryScanner from "@/pages/DeliveryScanner";
 import CompletedDeliveries from "@/pages/CompletedDeliveries";
+import PendingOrders from "@/pages/PendingOrders";
 import TokensPage from "@/pages/TokensPage";
 import NotFound from "@/pages/NotFound";
 
@@ -115,6 +116,11 @@ function App() {
               <Route path="/delivery/completed" element={
                 <DeliveryRoute>
                   <CompletedDeliveries />
+                </DeliveryRoute>
+              } />
+              <Route path="/pending-orders" element={
+                <DeliveryRoute>
+                  <PendingOrders />
                 </DeliveryRoute>
               } />
 

@@ -22,6 +22,9 @@ const Cart = () => {
   const { toast } = useToast();
   const [processing, setProcessing] = useState(false);
   const [completedOrder, setCompletedOrder] = useState<any>(null);
+  const [phone, setPhone] = useState("");
+  const [location, setLocation] = useState("");
+  const [showDeliveryForm, setShowDeliveryForm] = useState(false);
 
   const handleCheckout = async () => {
     if (!currentUser) {
@@ -34,11 +37,20 @@ const Cart = () => {
     }
 
     if (cart.length === 0) {
-        toast({
+      toast({
         title: "Empty Cart",
         description: "Your cart is empty. Add some items before checking out.",
-          variant: "destructive",
-        });
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!phone || !location) {
+      toast({
+        title: "Missing Information",
+        description: "Please provide phone number and college location.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -74,14 +86,16 @@ const Cart = () => {
           scannedAt: null,
           deliveredAt: null,
           deliveryPerson: null,
-          estimatedTime: new Date(Date.now() + 30 * 60 * 1000).toISOString() // 30 minutes from now
+          estimatedTime: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 minutes from now
+          location: location,
+          phone: phone
         },
         totalItems: cart.reduce((sum, item) => sum + item.quantity, 0),
         lastUpdated: new Date().toISOString(),
         userDetails: {
           name: currentUser.displayName || "Customer",
           email: currentUser.email || "",
-          phone: currentUser.phoneNumber || ""
+          phone: phone
         }
       };
       
@@ -163,7 +177,7 @@ const Cart = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-4 sm:py-6 md:py-8">
+    <div className="container mx-auto px-4 py-8">
       <div className="flex items-center gap-4 mb-4 sm:mb-6 md:mb-8">
         <Button variant="ghost" size="icon" asChild>
           <Link to="/menu">
@@ -212,16 +226,43 @@ const Cart = () => {
                   <span className="text-sm sm:text-base font-semibold">{totalItems}</span>
                 </div>
                 <Separator />
-                <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
-                  <Coins className="h-4 w-4" />
-                  <span>Available Tokens: {tokens}</span>
-                </div>
-                {tokens <= 0 && (
-                  <div className="flex items-center gap-2 text-xs sm:text-sm text-red-500">
-                    <AlertCircle className="h-4 w-4" />
-                    <span>No tokens available</span>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
+                    <Coins className="h-4 w-4" />
+                    <span>Available Tokens: {tokens}</span>
                   </div>
-                )}
+                  {tokens <= 0 && (
+                    <div className="flex items-center gap-2 text-xs sm:text-sm text-red-500">
+                      <AlertCircle className="h-4 w-4" />
+                      <span>No tokens available</span>
+                    </div>
+                  )}
+                </div>
+                <Separator />
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
+                    <span>Phone Number:</span>
+                    <input
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="flex-1 p-1 border rounded-md text-xs"
+                      placeholder="Enter your phone number"
+                      required
+                    />
+                  </div>
+                  <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
+                    <span>College Location:</span>
+                    <input
+                      type="text"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      className="flex-1 p-1 border rounded-md text-xs"
+                      placeholder="Enter college location"
+                      required
+                    />
+                  </div>
+                </div>
               </CardContent>
               <CardFooter className="px-4 sm:px-6">
                 <Button

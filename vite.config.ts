@@ -8,6 +8,16 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        timeout: 30000, // 30 seconds timeout
+      }
+    },
+    hmr: {
+      timeout: 5000 // 5 seconds timeout for HMR
+    }
   },
   plugins: [
     react(),

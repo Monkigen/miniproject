@@ -51,10 +51,11 @@ const Delivery = () => {
       setLoading(true);
       const ordersRef = collection(db, "orders");
       
-      // Simplified query that only uses deliveryPartnerId
+      // Query for delivered orders
       let q = query(
         ordersRef,
-        where("deliveryDetails.deliveryPartnerId", "==", currentUser.uid),
+        where("deliveryDetails.status", "==", "delivered"),
+        orderBy("deliveryDetails.deliveredAt", "desc"),
         limit(ORDERS_PER_PAGE)
       );
 
@@ -62,7 +63,8 @@ const Delivery = () => {
       if (!isInitial && lastVisible) {
         q = query(
           ordersRef,
-          where("deliveryDetails.deliveryPartnerId", "==", currentUser.uid),
+          where("deliveryDetails.status", "==", "delivered"),
+          orderBy("deliveryDetails.deliveredAt", "desc"),
           startAfter(lastVisible),
           limit(ORDERS_PER_PAGE)
         );
@@ -79,18 +81,11 @@ const Delivery = () => {
       // Check if there are more documents
       setHasMore(querySnapshot.docs.length === ORDERS_PER_PAGE);
       
-      // Filter and sort completed orders on the client side
-      const newOrders = querySnapshot.docs
-        .map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        } as Order))
-        .filter(order => order.deliveryDetails?.status === "delivered")
-        .sort((a, b) => {
-          const dateA = a.deliveryDetails?.deliveredAt?.toDate() || new Date(0);
-          const dateB = b.deliveryDetails?.deliveredAt?.toDate() || new Date(0);
-          return dateB.getTime() - dateA.getTime();
-        });
+      // Map the documents to orders
+      const newOrders = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      } as Order));
       
       if (newOrders.length > 0) {
         console.log("Fetched new orders:", newOrders);
@@ -105,11 +100,7 @@ const Delivery = () => {
             const uniqueOrders = Array.from(
               new Map(combined.map(order => [order.id, order])).values()
             );
-            return uniqueOrders.sort((a, b) => {
-              const dateA = a.deliveryDetails?.deliveredAt?.toDate() || new Date(0);
-              const dateB = b.deliveryDetails?.deliveredAt?.toDate() || new Date(0);
-              return dateB.getTime() - dateA.getTime();
-            });
+            return uniqueOrders;
           });
         }
       } else if (isInitial) {
@@ -244,40 +235,10 @@ const Delivery = () => {
       // Update the order in Firestore
       await updateDoc(doc(db, "orders", orderDoc.id), updatedOrderData);
 
-      // Reset pagination state
+      // Reset pagination state and refresh completed orders
       setLastVisible(null);
       setHasMore(true);
-
-      // Fetch fresh data from the database
-      const completedOrdersQuery = query(
-        ordersRef,
-        where("deliveryDetails.deliveryPartnerId", "==", currentUser.uid),
-        limit(ORDERS_PER_PAGE)
-      );
-
-      const completedOrdersSnapshot = await getDocs(completedOrdersQuery);
-      
-      const newCompletedOrders = completedOrdersSnapshot.docs
-        .map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        } as Order))
-        .filter(order => order.deliveryDetails?.status === "delivered")
-        .sort((a, b) => {
-          const dateA = a.deliveryDetails?.deliveredAt?.toDate() || new Date(0);
-          const dateB = b.deliveryDetails?.deliveredAt?.toDate() || new Date(0);
-          return dateB.getTime() - dateA.getTime();
-        });
-
-      // Update the completed orders list with fresh data
-      setCompletedOrders(newCompletedOrders);
-
-      // Update last visible document for pagination
-      const lastDoc = completedOrdersSnapshot.docs[completedOrdersSnapshot.docs.length - 1];
-      setLastVisible(lastDoc);
-      
-      // Update hasMore flag
-      setHasMore(completedOrdersSnapshot.docs.length === ORDERS_PER_PAGE);
+      await fetchCompletedOrders(true); // Refresh the completed orders list
 
       toast({
         title: "Success",
@@ -342,6 +303,14 @@ const Delivery = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Delivery Portal</h1>
+        <Link to="/pending-orders">
+          <Button className="bg-campus-green hover:bg-campus-green/90">
+            Pending Orders
+          </Button>
+        </Link>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Scanner Section */}
         <Card>
@@ -398,11 +367,31 @@ const Delivery = () => {
                           <div className="flex items-center space-x-2 text-xs text-gray-500">
                             <Calendar className="h-3 w-3" />
                             <span>
-                              {order.deliveryDetails?.deliveredAt?.toDate().toLocaleDateString() || 'N/A'}
+                              {(() => {
+                                const date = order.deliveryDetails?.deliveredAt;
+                                if (!date) return 'N/A';
+                                if (typeof date === 'string') {
+                                  return new Date(date).toLocaleDateString();
+                                }
+                                if (date.toDate) {
+                                  return date.toDate().toLocaleDateString();
+                                }
+                                return 'N/A';
+                              })()}
                             </span>
                             <Clock className="h-3 w-3 ml-2" />
                             <span>
-                              {order.deliveryDetails?.deliveredAt?.toDate().toLocaleTimeString() || 'N/A'}
+                              {(() => {
+                                const date = order.deliveryDetails?.deliveredAt;
+                                if (!date) return 'N/A';
+                                if (typeof date === 'string') {
+                                  return new Date(date).toLocaleTimeString();
+                                }
+                                if (date.toDate) {
+                                  return date.toDate().toLocaleTimeString();
+                                }
+                                return 'N/A';
+                              })()}
                             </span>
                           </div>
                         </div>

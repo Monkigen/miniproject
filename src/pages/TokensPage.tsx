@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
-const TokensPage = () => {
+const TokensPage: React.FC = () => {
   const { currentUser } = useAuth();
   const { subscription, tokens, loading, refreshSubscription } = useSubscription();
   const [showQRExample, setShowQRExample] = useState(false);
@@ -24,27 +24,41 @@ const TokensPage = () => {
     }
   }, [currentUser, navigate]);
 
-  const handleExtendTokens = async () => {
+  // Memoize the token display data
+  const tokenDisplayData = useMemo(() => ({
+    availableTokens: tokens,
+    usedTokens: 0
+  }), [tokens]);
+
+  // Memoize the subscription details
+  const subscriptionDetails = useMemo(() => {
+    if (!subscription) return null;
+    return {
+      plan: subscription.plan,
+      active: subscription.active,
+      startDate: new Date(subscription.startDate).toLocaleDateString(),
+      endDate: new Date(subscription.endDate).toLocaleDateString()
+    };
+  }, [subscription]);
+
+  // Memoize the handleExtendTokens function
+  const handleExtendTokens = useCallback(async () => {
     if (!subscription || !currentUser) return;
     
     setIsExtending(true);
     try {
-      // Calculate new end date (2 months from current end date)
       const currentEndDate = new Date(subscription.endDate);
       const newEndDate = new Date(currentEndDate);
       newEndDate.setMonth(newEndDate.getMonth() + 2);
 
-      // Update the subscription in Firebase
       const userRef = doc(db, "users", currentUser.uid);
       await updateDoc(userRef, {
         "subscription.endDate": newEndDate.toISOString(),
         "subscription.active": true,
-        "subscription.hasExtended": true // Add flag to track extension
+        "subscription.hasExtended": true
       });
       
-      // Refresh the subscription data to update the UI
       await refreshSubscription();
-      
       toast.success("Token expiration date extended successfully!");
     } catch (error) {
       console.error("Error extending token expiration:", error);
@@ -52,8 +66,25 @@ const TokensPage = () => {
     } finally {
       setIsExtending(false);
     }
-  };
-  
+  }, [subscription, currentUser, refreshSubscription]);
+
+  // Memoize the QR code example data
+  const qrExampleData = useMemo(() => ({
+    id: "example-order-123",
+    userId: currentUser?.uid || "",
+    items: [
+      { id: "1", name: "Sample Meal", price: 0, quantity: 1 }
+    ],
+    total: 0,
+    status: "pending",
+    trackingStatus: "order_placed",
+    createdAt: new Date(),
+    userDetails: {
+      name: currentUser?.displayName || "Sample User",
+      email: currentUser?.email || "sample@example.com"
+    }
+  }), [currentUser]);
+
   if (!currentUser) {
     return null; // Return null while redirecting
   }
@@ -87,13 +118,19 @@ const TokensPage = () => {
           <CardContent>
             <div className="flex items-center justify-center py-8">
               <div className="text-center">
-                <div className="text-6xl font-bold text-campus-green">{tokens}</div>
-                <div className="text-xl mb-2">tokens available</div>
+                <div className="text-6xl font-bold text-campus-green">{tokenDisplayData.availableTokens}</div>
+                <div className="text-xl mb-2">Tokens Available</div>
                 {subscription?.tokens && (
-                  <div className="text-sm text-gray-600 space-y-1">
-                    <p className="font-medium">Total tokens: 8</p>
-                    <p>Tokens available: {tokens}</p>
-                    <p>Tokens used: {8 - tokens}</p>
+                  <div className="text-sm text-gray-600 space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span>Used Tokens:</span>
+                      <span className="font-medium">{tokenDisplayData.usedTokens}</span>
+                    </div>
+                    <Separator className="my-2" />
+                    <div className="flex justify-between items-center font-medium">
+                      <span>Available Balance:</span>
+                      <span className="text-campus-green">{tokenDisplayData.availableTokens}</span>
+                    </div>
                   </div>
                 )}
               </div>
@@ -370,21 +407,7 @@ const TokensPage = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="max-w-md w-full">
             <OrderQRCode 
-              order={{
-                id: "example-order-123",
-                userId: currentUser?.uid || "",
-                items: [
-                  { id: "1", name: "Sample Meal", price: 0, quantity: 1 }
-                ],
-                total: 0,
-                status: "pending",
-                trackingStatus: "order_placed",
-                createdAt: new Date(),
-                userDetails: {
-                  name: currentUser?.displayName || "Sample User",
-                  email: currentUser?.email || "sample@example.com"
-                }
-              }}
+              order={qrExampleData}
               onClose={() => setShowQRExample(false)} 
             />
           </div>
@@ -394,4 +417,4 @@ const TokensPage = () => {
   );
 };
 
-export default TokensPage;
+export default React.memo(TokensPage);
