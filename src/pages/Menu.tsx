@@ -109,6 +109,193 @@ const mealPlans: MealPlan[] = [
       { day: "SAT", image: "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=800&auto=format&fit=crop&q=60" }
     ]
   },
+  {
+    id: "breakfast-plain-dosa",
+    title: "Plain Dosa",
+    type: "Breakfast",
+    description: "Crispy and thin South Indian crepe made from fermented rice and lentil batter. Prep time <15 mins, Cooking time <20 mins.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" }
+    ],
+    days: [
+      { day: "MON", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "TUE", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "WED", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "THU", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "FRI", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "SAT", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" }
+    ]
+  },
+  {
+    id: "breakfast-masala-dosa",
+    title: "Masala Dosa",
+    type: "Breakfast",
+    description: "Crispy dosa filled with spiced potato filling. Prep time <15 mins, Cooking time <20 mins.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" }
+    ],
+    days: [
+      { day: "MON", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "TUE", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "WED", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "THU", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "FRI", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "SAT", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" }
+    ]
+  },
+  {
+    id: "breakfast-rava-dosa",
+    title: "Rava Dosa",
+    type: "Breakfast",
+    description: "Crispy dosa made with semolina and rice flour. Prep time <15 mins, Cooking time <20 mins.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" }
+    ],
+    days: [
+      { day: "MON", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "TUE", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "WED", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "THU", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "FRI", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "SAT", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" }
+    ]
+  },
+  {
+    id: "breakfast-wheat-dosa",
+    title: "Gothuma / Wheat Dosa",
+    type: "Breakfast",
+    description: "Healthy dosa made with whole wheat flour. Prep time <15 mins, Cooking time <20 mins.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" }
+    ],
+    days: [
+      { day: "MON", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "TUE", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "WED", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "THU", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "FRI", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "SAT", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" }
+    ]
+  },
+  {
+    id: "breakfast-onion-uttappam",
+    title: "Onion Uttappam",
+    type: "Breakfast",
+    description: "Thick and fluffy dosa topped with onions and spices. Prep time <15 mins, Cooking time <20 mins.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" }
+    ],
+    days: [
+      { day: "MON", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "TUE", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "WED", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "THU", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "FRI", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "SAT", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" }
+    ]
+  },
+  {
+    id: "breakfast-oats-dosa",
+    title: "Oats Dosa",
+    type: "Breakfast",
+    description: "Healthy dosa made with oats and rice flour. Prep time <15 mins, Cooking time <20 mins.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" }
+    ],
+    days: [
+      { day: "MON", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "TUE", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "WED", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "THU", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "FRI", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "SAT", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" }
+    ]
+  },
+  {
+    id: "breakfast-masala-oats-dosa",
+    title: "Masala Oats Dosa",
+    type: "Breakfast",
+    description: "Oats dosa filled with spiced potato filling. Prep time <15 mins, Cooking time <20 mins.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" }
+    ],
+    days: [
+      { day: "MON", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "TUE", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "WED", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "THU", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "FRI", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "SAT", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" }
+    ]
+  },
+  {
+    id: "breakfast-spring-roll-dosa",
+    title: "Vegetable Spring Roll Dosa",
+    type: "Breakfast",
+    description: "Dosa filled with stir-fried vegetables in spring roll style. Prep time <15 mins, Cooking time <20 mins.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" }
+    ],
+    days: [
+      { day: "MON", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "TUE", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "WED", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "THU", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "FRI", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "SAT", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" }
+    ]
+  },
+  {
+    id: "breakfast-ragi-dosa",
+    title: "Ragi Dosa",
+    type: "Breakfast",
+    description: "Nutritious dosa made with finger millet flour. Prep time <15 mins, Cooking time <20 mins.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" }
+    ],
+    days: [
+      { day: "MON", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "TUE", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "WED", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "THU", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "FRI", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "SAT", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" }
+    ]
+  },
+  {
+    id: "breakfast-maida-dosa",
+    title: "Maida Dosa",
+    type: "Breakfast",
+    description: "Crispy dosa made with all-purpose flour. Prep time <15 mins, Cooking time <20 mins.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" }
+    ],
+    days: [
+      { day: "MON", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "TUE", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "WED", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "THU", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "FRI", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "SAT", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" }
+    ]
+  },
+  {
+    id: "breakfast-tomato-dosa",
+    title: "Instant Tomato Dosa",
+    type: "Breakfast",
+    description: "Quick and easy dosa made with tomato and rice flour. Prep time <15 mins, Cooking time <20 mins.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" }
+    ],
+    days: [
+      { day: "MON", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "TUE", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "WED", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "THU", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "FRI", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" },
+      { day: "SAT", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&auto=format&fit=crop&q=60" }
+    ]
+  },
 
   // Lunch Items
   {
@@ -184,6 +371,329 @@ const mealPlans: MealPlan[] = [
     title: "Healthy Lunch Bowl",
     type: "Lunch",
     description: "Nutritious lunch bowl with quinoa, grilled vegetables, and protein of your choice.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" }
+    ],
+    days: [
+      { day: "MON", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "TUE", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "WED", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "THU", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "FRI", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "SAT", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" }
+    ]
+  },
+  {
+    id: "lunch-veggie-burger",
+    title: "Indian Spiced Veggie Burgers",
+    type: "Lunch",
+    description: "Flavorful vegetarian burgers made with Indian spices and fresh vegetables.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&auto=format&fit=crop&q=60" }
+    ],
+    days: [
+      { day: "MON", image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&auto=format&fit=crop&q=60" },
+      { day: "TUE", image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&auto=format&fit=crop&q=60" },
+      { day: "WED", image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&auto=format&fit=crop&q=60" },
+      { day: "THU", image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&auto=format&fit=crop&q=60" },
+      { day: "FRI", image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&auto=format&fit=crop&q=60" },
+      { day: "SAT", image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&auto=format&fit=crop&q=60" }
+    ]
+  },
+  {
+    id: "lunch-naan",
+    title: "Naan (Indian Yeast Flatbread)",
+    type: "Lunch",
+    description: "Soft and fluffy leavened flatbread, perfect with curries and gravies.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800&auto=format&fit=crop&q=60" }
+    ],
+    days: [
+      { day: "MON", image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800&auto=format&fit=crop&q=60" },
+      { day: "TUE", image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800&auto=format&fit=crop&q=60" },
+      { day: "WED", image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800&auto=format&fit=crop&q=60" },
+      { day: "THU", image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800&auto=format&fit=crop&q=60" },
+      { day: "FRI", image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800&auto=format&fit=crop&q=60" },
+      { day: "SAT", image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800&auto=format&fit=crop&q=60" }
+    ]
+  },
+  {
+    id: "lunch-roti",
+    title: "Roti (Indian Flatbread)",
+    type: "Lunch",
+    description: "Traditional unleavened whole wheat flatbread, healthy and nutritious.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800&auto=format&fit=crop&q=60" }
+    ],
+    days: [
+      { day: "MON", image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800&auto=format&fit=crop&q=60" },
+      { day: "TUE", image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800&auto=format&fit=crop&q=60" },
+      { day: "WED", image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800&auto=format&fit=crop&q=60" },
+      { day: "THU", image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800&auto=format&fit=crop&q=60" },
+      { day: "FRI", image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800&auto=format&fit=crop&q=60" },
+      { day: "SAT", image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800&auto=format&fit=crop&q=60" }
+    ]
+  },
+  {
+    id: "lunch-tandoori-burger",
+    title: "Tandoori Chicken Burgers",
+    type: "Lunch",
+    description: "Spiced chicken patties with tandoori flavors, served in a bun with mint chutney.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&auto=format&fit=crop&q=60" }
+    ],
+    days: [
+      { day: "MON", image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&auto=format&fit=crop&q=60" },
+      { day: "TUE", image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&auto=format&fit=crop&q=60" },
+      { day: "WED", image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&auto=format&fit=crop&q=60" },
+      { day: "THU", image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&auto=format&fit=crop&q=60" },
+      { day: "FRI", image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&auto=format&fit=crop&q=60" },
+      { day: "SAT", image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&auto=format&fit=crop&q=60" }
+    ]
+  },
+  {
+    id: "lunch-raita",
+    title: "Raita (Indian Yogurt Condiments)",
+    type: "Lunch",
+    description: "Cooling yogurt-based condiment with cucumber, mint, and spices.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" }
+    ],
+    days: [
+      { day: "MON", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "TUE", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "WED", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "THU", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "FRI", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "SAT", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" }
+    ]
+  },
+  {
+    id: "lunch-butter-chicken",
+    title: "Chicken Makhani (Butter Chicken Curry)",
+    type: "Lunch",
+    description: "Creamy tomato-based curry with tender chicken pieces, a North Indian classic.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" }
+    ],
+    days: [
+      { day: "MON", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "TUE", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "WED", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "THU", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "FRI", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "SAT", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" }
+    ]
+  },
+  {
+    id: "lunch-mango-chicken",
+    title: "Mango Chicken Curry",
+    type: "Lunch",
+    description: "Sweet and tangy chicken curry with fresh mangoes and aromatic spices.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" }
+    ],
+    days: [
+      { day: "MON", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "TUE", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "WED", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "THU", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "FRI", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "SAT", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" }
+    ]
+  },
+  {
+    id: "lunch-masala-bhindi",
+    title: "Masala Bhindi",
+    type: "Lunch",
+    description: "Spiced okra stir-fry with onions and aromatic spices.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" }
+    ],
+    days: [
+      { day: "MON", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "TUE", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "WED", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "THU", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "FRI", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "SAT", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" }
+    ]
+  },
+  {
+    id: "lunch-chana-kulcha",
+    title: "Chana Kulcha",
+    type: "Lunch",
+    description: "Spiced chickpea curry served with soft kulcha bread.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" }
+    ],
+    days: [
+      { day: "MON", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "TUE", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "WED", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "THU", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "FRI", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "SAT", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" }
+    ]
+  },
+  {
+    id: "lunch-shahi-egg",
+    title: "Shahi Egg Curry",
+    type: "Lunch",
+    description: "Rich and creamy egg curry with royal spices and cashew gravy.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" }
+    ],
+    days: [
+      { day: "MON", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "TUE", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "WED", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "THU", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "FRI", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "SAT", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" }
+    ]
+  },
+  {
+    id: "lunch-gujarati-kadhi",
+    title: "Gujarati Kadhi",
+    type: "Lunch",
+    description: "Sweet and sour yogurt-based curry with gram flour dumplings.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" }
+    ],
+    days: [
+      { day: "MON", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "TUE", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "WED", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "THU", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "FRI", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "SAT", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" }
+    ]
+  },
+  {
+    id: "lunch-allahabad-tehri",
+    title: "Allahabad Ki Tehri",
+    type: "Lunch",
+    description: "Traditional rice dish with vegetables and aromatic spices from Uttar Pradesh.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" }
+    ],
+    days: [
+      { day: "MON", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "TUE", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "WED", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "THU", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "FRI", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "SAT", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" }
+    ]
+  },
+  {
+    id: "lunch-dahi-chicken",
+    title: "Low Fat Dahi Chicken",
+    type: "Lunch",
+    description: "Healthy yogurt-based chicken curry with minimal oil and maximum flavor.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" }
+    ],
+    days: [
+      { day: "MON", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "TUE", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "WED", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "THU", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "FRI", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "SAT", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" }
+    ]
+  },
+  {
+    id: "lunch-kolhapuri-veg",
+    title: "Kolhapuri Vegetables",
+    type: "Lunch",
+    description: "Spicy mixed vegetable curry with authentic Kolhapuri masala.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" }
+    ],
+    days: [
+      { day: "MON", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "TUE", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "WED", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "THU", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "FRI", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "SAT", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" }
+    ]
+  },
+  {
+    id: "lunch-black-channa",
+    title: "Black Channa and Coconut Stew",
+    type: "Lunch",
+    description: "Hearty black chickpea curry in a rich coconut-based gravy.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" }
+    ],
+    days: [
+      { day: "MON", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "TUE", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "WED", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "THU", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "FRI", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "SAT", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" }
+    ]
+  },
+  {
+    id: "lunch-spinach-paratha",
+    title: "Stuffed Spinach Paratha",
+    type: "Lunch",
+    description: "Whole wheat flatbread stuffed with spiced spinach and paneer.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800&auto=format&fit=crop&q=60" }
+    ],
+    days: [
+      { day: "MON", image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800&auto=format&fit=crop&q=60" },
+      { day: "TUE", image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800&auto=format&fit=crop&q=60" },
+      { day: "WED", image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800&auto=format&fit=crop&q=60" },
+      { day: "THU", image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800&auto=format&fit=crop&q=60" },
+      { day: "FRI", image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800&auto=format&fit=crop&q=60" },
+      { day: "SAT", image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800&auto=format&fit=crop&q=60" }
+    ]
+  },
+  {
+    id: "lunch-masala-corn",
+    title: "Masala Corn",
+    type: "Lunch",
+    description: "Spiced sweet corn with onions, tomatoes, and chaat masala.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" }
+    ],
+    days: [
+      { day: "MON", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "TUE", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "WED", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "THU", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "FRI", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "SAT", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" }
+    ]
+  },
+  {
+    id: "lunch-rava-idli",
+    title: "Quick Rava Idli and Coconut Chutney",
+    type: "Lunch",
+    description: "Instant semolina idlis served with fresh coconut chutney.",
+    images: [
+      { url: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" }
+    ],
+    days: [
+      { day: "MON", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "TUE", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "WED", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "THU", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "FRI", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" },
+      { day: "SAT", image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" }
+    ]
+  },
+  {
+    id: "lunch-punjabi-dals",
+    title: "Punjabi Dals",
+    type: "Lunch",
+    description: "Assortment of traditional Punjabi lentil preparations.",
     images: [
       { url: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=60" }
     ],

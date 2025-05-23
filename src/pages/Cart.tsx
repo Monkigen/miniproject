@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,7 +24,21 @@ const Cart = () => {
   const [completedOrder, setCompletedOrder] = useState<any>(null);
   const [phone, setPhone] = useState("");
   const [location, setLocation] = useState("");
-  const [showDeliveryForm, setShowDeliveryForm] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+
+  // Load saved delivery details from localStorage
+  useEffect(() => {
+    const savedPhone = localStorage.getItem('deliveryPhone');
+    const savedLocation = localStorage.getItem('deliveryLocation');
+    if (savedPhone) setPhone(savedPhone);
+    if (savedLocation) setLocation(savedLocation);
+  }, []);
+
+  // Save delivery details to localStorage when they change
+  useEffect(() => {
+    if (phone) localStorage.setItem('deliveryPhone', phone);
+    if (location) localStorage.setItem('deliveryLocation', location);
+  }, [phone, location]);
 
   const handleCheckout = async () => {
     if (!currentUser) {
@@ -239,36 +253,86 @@ const Cart = () => {
                   )}
                 </div>
                 <Separator />
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
-                    <span>Phone Number:</span>
-                    <input
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="flex-1 p-1 border rounded-md text-xs"
-                      placeholder="Enter your phone number"
-                      required
-                    />
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-medium">Delivery Details</h3>
+                    {!isEditing && (phone || location) && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setIsEditing(true)}
+                        className="text-xs"
+                      >
+                        Change
+                      </Button>
+                    )}
                   </div>
-                  <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
-                    <span>College Location:</span>
-                    <input
-                      type="text"
-                      value={location}
-                      onChange={(e) => setLocation(e.target.value)}
-                      className="flex-1 p-1 border rounded-md text-xs"
-                      placeholder="Enter college location"
-                      required
-                    />
-                  </div>
+                  {isEditing ? (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
+                        <span>Phone Number:</span>
+                        <input
+                          type="tel"
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                          className="flex-1 p-1 border rounded-md text-xs"
+                          placeholder="Enter your phone number"
+                          required
+                        />
+                      </div>
+                      <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
+                        <span>College Location:</span>
+                        <input
+                          type="text"
+                          value={location}
+                          onChange={(e) => setLocation(e.target.value)}
+                          className="flex-1 p-1 border rounded-md text-xs"
+                          placeholder="Enter college location"
+                          required
+                        />
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsEditing(false)}
+                        className="w-full mt-2"
+                      >
+                        Save Details
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {phone && (
+                        <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
+                          <span className="font-medium">Phone:</span>
+                          <span>{phone}</span>
+                        </div>
+                      )}
+                      {location && (
+                        <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
+                          <span className="font-medium">Location:</span>
+                          <span>{location}</span>
+                        </div>
+                      )}
+                      {!phone && !location && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setIsEditing(true)}
+                          className="w-full"
+                        >
+                          Add Delivery Details
+                        </Button>
+                      )}
+                    </div>
+                  )}
                 </div>
               </CardContent>
               <CardFooter className="px-4 sm:px-6">
                 <Button
                   className="w-full text-sm sm:text-base" 
                   onClick={handleCheckout}
-                  disabled={!canPlaceOrder || processing}
+                  disabled={!canPlaceOrder || processing || !phone || !location}
                 >
                   {processing ? "Processing..." : "Place Order"}
                 </Button>

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 export interface MenuItem {
   id: string;
@@ -28,38 +29,55 @@ const CartContext = createContext<CartContextProps | undefined>(undefined);
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const { toast } = useToast();
+  const { currentUser } = useAuth();
 
-  // Load cart from localStorage on component mount
+  // Load cart from localStorage when user is authenticated
   useEffect(() => {
-    const savedCart = localStorage.getItem("campusBiteCart");
-    if (savedCart) {
-      try {
-        setCart(JSON.parse(savedCart));
-      } catch (error) {
-        console.error("Failed to parse saved cart:", error);
-        // If there's an error parsing the cart, clear it
-        localStorage.removeItem("campusBiteCart");
+    if (currentUser) {
+      const userCartKey = `campusBiteCart_${currentUser.uid}`;
+      const savedCart = localStorage.getItem(userCartKey);
+      if (savedCart) {
+        try {
+          setCart(JSON.parse(savedCart));
+        } catch (error) {
+          console.error("Failed to parse saved cart:", error);
+          localStorage.removeItem(userCartKey);
+          setCart([]);
+        }
+      } else {
         setCart([]);
       }
+    } else {
+      setCart([]);
     }
-  }, []);
+  }, [currentUser]);
 
   // Save cart to localStorage whenever it changes
   useEffect(() => {
-    try {
-    localStorage.setItem("campusBiteCart", JSON.stringify(cart));
-    } catch (error) {
-      console.error("Failed to save cart:", error);
+    if (currentUser) {
+      const userCartKey = `campusBiteCart_${currentUser.uid}`;
+      try {
+        localStorage.setItem(userCartKey, JSON.stringify(cart));
+      } catch (error) {
+        console.error("Failed to save cart:", error);
+      }
     }
-  }, [cart]);
+  }, [cart, currentUser]);
 
   const addToCart = (item: MenuItem) => {
+    if (!currentUser) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to add items to cart",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setCart((prevCart) => {
-      // Check if item already exists in cart
       const existingItemIndex = prevCart.findIndex((cartItem) => cartItem.id === item.id);
 
       if (existingItemIndex >= 0) {
-        // Item exists, increment quantity
         const updatedCart = [...prevCart];
         updatedCart[existingItemIndex].quantity += 1;
         
@@ -70,7 +88,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         return updatedCart;
       } else {
-        // Item doesn't exist, add it with quantity 1
         const newCart = [...prevCart, { ...item, quantity: 1 }];
         
         toast({
@@ -119,8 +136,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const clearCart = () => {
+    if (currentUser) {
+      const userCartKey = `campusBiteCart_${currentUser.uid}`;
+      localStorage.removeItem(userCartKey);
+    }
     setCart([]);
-    localStorage.removeItem("campusBiteCart");
     toast({
       title: "Cart cleared",
       description: "All items have been removed from your cart",
