@@ -118,18 +118,22 @@ const TokensPage: React.FC = () => {
           <CardContent>
             <div className="flex items-center justify-center py-8">
               <div className="text-center">
-                <div className="text-6xl font-bold text-campus-green">{tokenDisplayData.availableTokens}</div>
-                <div className="text-xl mb-2">Tokens Available</div>
-                {subscription?.tokens && (
-                  <div className="text-sm text-gray-600 space-y-2">
+                <div className="text-xl mb-2">Subscribed Tokens</div>
+                {/* Show Used Tokens and Remaining Balance if subscription is active */}
+                {subscription?.active && subscription.tokens !== undefined && ( // Check if subscription is active and initial tokens are available
+                  <div className="text-sm text-gray-600 space-y-2 mt-4">
+                    <div className="flex justify-between items-center">
+                      <span>Initial Tokens:</span>
+                      <span className="font-medium">{subscription.tokens}</span>
+                    </div>
                     <div className="flex justify-between items-center">
                       <span>Used Tokens:</span>
-                      <span className="font-medium">{tokenDisplayData.usedTokens}</span>
+                      <span className="font-medium">{(subscription.tokens || 0) - (tokens || 0)}</span>
                     </div>
                     <Separator className="my-2" />
                     <div className="flex justify-between items-center font-medium">
-                      <span>Available Balance:</span>
-                      <span className="text-campus-green">{tokenDisplayData.availableTokens}</span>
+                      <span>Remaining Balance:</span>
+                      <span className="text-campus-green">{tokens}</span>
                     </div>
                   </div>
                 )}

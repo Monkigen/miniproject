@@ -24,6 +24,7 @@ import {
   ArrowUpDown,
   Search,
   Trash2,
+  Download,
 } from "lucide-react";
 import {
   Select,
@@ -46,6 +47,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import jsPDF from 'jspdf';
 
 interface User {
   id: string;
@@ -331,6 +333,74 @@ const Admin = () => {
     setDeleteDialogOpen(true);
   };
 
+  const handleExportFoodItems = () => {
+    const doc = new jsPDF();
+    const itemsSummary: { [key: string]: number } = {};
+
+    // Aggregate quantities for each food item from ALL filtered orders
+    filteredAndSortedData.orders.forEach(order => {
+      order.items.forEach(item => {
+        if (itemsSummary[item.name]) {
+          itemsSummary[item.name] += item.quantity;
+        } else {
+          itemsSummary[item.name] = item.quantity;
+        }
+      });
+    });
+
+    // Prepare data for PDF
+    let yOffset = 10;
+    doc.text("Food Items Summary", 10, yOffset);
+    yOffset += 10;
+    doc.text("--------------------", 10, yOffset);
+    yOffset += 10;
+
+    for (const itemName in itemsSummary) {
+      if (itemsSummary.hasOwnProperty(itemName)) {
+        doc.text(`${itemName}: ${itemsSummary[itemName]}`, 10, yOffset);
+        yOffset += 7;
+      }
+    }
+
+    // Save the PDF
+    doc.save('food_items_summary.pdf');
+  };
+
+  const handleExportOrderPlacedFoodItems = () => {
+    const doc = new jsPDF();
+    const itemsSummary: { [key: string]: number } = {};
+
+    // Filter for Order Placed orders and aggregate quantities
+    const orderPlacedOrders = filteredAndSortedData.orders.filter(order => order.status === 'order_placed' || order.trackingStatus === 'order_placed');
+
+    orderPlacedOrders.forEach(order => {
+      order.items.forEach(item => {
+        if (itemsSummary[item.name]) {
+          itemsSummary[item.name] += item.quantity;
+        } else {
+          itemsSummary[item.name] = item.quantity;
+        }
+      });
+    });
+
+    // Prepare data for PDF
+    let yOffset = 10;
+    doc.text("Order Placed Food Items Summary", 10, yOffset);
+    yOffset += 10;
+    doc.text("------------------------------", 10, yOffset);
+    yOffset += 10;
+
+    for (const itemName in itemsSummary) {
+      if (itemsSummary.hasOwnProperty(itemName)) {
+        doc.text(`${itemName}: ${itemsSummary[itemName]}`, 10, yOffset);
+        yOffset += 7;
+      }
+    }
+
+    // Save the PDF
+    doc.save('order_placed_food_items_summary.pdf');
+  };
+
   if (initializing) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -419,7 +489,7 @@ const Admin = () => {
               <CardTitle>User Management</CardTitle>
             </CardHeader>
             <CardContent>
-              {loading ? (
+              {loading && filteredAndSortedData.users.length === 0 ? (
                 <div className="space-y-4">
                   {[1, 2, 3].map((i) => (
                     <Skeleton key={i} className="h-16 w-full" />
@@ -462,54 +532,148 @@ const Admin = () => {
         </TabsContent>
 
         <TabsContent value="orders">
-          <Card>
-            <CardHeader>
-              <CardTitle>Order Management</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <div className="space-y-4">
-                  {[1, 2, 3].map((i) => (
-                    <Skeleton key={i} className="h-16 w-full" />
-                  ))}
-                </div>
-              ) : filteredAndSortedData.orders.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-gray-500">No orders found</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {filteredAndSortedData.orders.map((order) => (
-                    <div key={order.id} className="p-4 border rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <div>
-                          <p className="font-medium">Order #{typeof order.id === 'string' ? order.id.slice(-8) : order.id}</p>
-                          <p className="text-sm text-gray-500">
-                            {order.userDetails?.name || "Unknown User"}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <Badge>{order.trackingStatus || "Pending"}</Badge>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => confirmDelete('order', order.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        <p>Items: {order.items?.length || 0}</p>
-                        <p>Total: {formatPrice(order.total)}</p>
-                        <p>Created: {formatDate(order.createdAt)}</p>
-                      </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Order Placed Orders */}
+            <div>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle>Order Placed</CardTitle>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleExportOrderPlacedFoodItems}
+                    disabled={filteredAndSortedData.orders.filter(order => order.status === 'order_placed' || order.trackingStatus === 'order_placed').length === 0 || loading}
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    Export
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  {loading && filteredAndSortedData.orders.length === 0 ? (
+                    <div className="space-y-4">
+                      {[1, 2, 3].map((i) => (
+                        <Skeleton key={i} className="h-16 w-full" />
+                      ))}
                     </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                  ) : filteredAndSortedData.orders.filter(order => order.status === 'order_placed' || order.trackingStatus === 'order_placed').length === 0 ? (
+                    <div className="text-center py-8">
+                      <p className="text-gray-500">No order placed orders found</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-500">
+                      {filteredAndSortedData.orders
+                        .filter(order => order.status === 'order_placed' || order.trackingStatus === 'order_placed')
+                        .map((order) => (
+                          <Card key={order.id} className="p-4 border rounded-lg">
+                            <div className="flex items-center justify-between mb-2">
+                              <div>
+                                <p className="font-medium">Order #{typeof order.id === 'string' ? order.id.slice(-8) : order.id}</p>
+                                <p className="text-sm text-gray-500">
+                                  {order.userDetails?.name || "Unknown User"}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-4">
+                                <Badge>{order.trackingStatus || order.status || "Unknown"}</Badge>
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  onClick={() => confirmDelete('order', order.id)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              <p>Items: {order.items?.length || 0}</p>
+                              <p>Created: {formatDate(order.createdAt)}</p>
+                            </div>
+                            {/* Display Order Items */}
+                            {order.items && order.items.length > 0 && (
+                              <div className="mt-3 pt-3 border-t border-gray-200">
+                                <p className="font-medium mb-2">Items:</p>
+                                <ul className="list-disc list-inside space-y-1">
+                                  {order.items.map(item => (
+                                    <li key={item.id} className="text-sm text-gray-700">
+                                      {item.name} (x{item.quantity})
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </Card>
+                        ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Delivered Orders */}
+            <div>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Delivered</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {loading && filteredAndSortedData.orders.length === 0 ? (
+                    <div className="space-y-4">
+                      {[1, 2, 3].map((i) => (
+                        <Skeleton key={i} className="h-16 w-full" />
+                      ))}
+                    </div>
+                  ) : filteredAndSortedData.orders.filter(order => order.status === 'delivered' || order.trackingStatus === 'delivered').length === 0 ? (
+                    <div className="text-center py-8">
+                      <p className="text-gray-500">No delivered orders found</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-500">
+                      {filteredAndSortedData.orders
+                        .filter(order => order.status === 'delivered' || order.trackingStatus === 'delivered')
+                        .map((order) => (
+                          <Card key={order.id} className="p-4 border rounded-lg">
+                            <div className="flex items-center justify-between mb-2">
+                              <div>
+                                <p className="font-medium">Order #{typeof order.id === 'string' ? order.id.slice(-8) : order.id}</p>
+                                <p className="text-sm text-gray-500">
+                                  {order.userDetails?.name || "Unknown User"}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-4">
+                                <Badge>{order.trackingStatus || order.status || "Unknown"}</Badge>
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  onClick={() => confirmDelete('order', order.id)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              <p>Items: {order.items?.length || 0}</p>
+                              <p>Created: {formatDate(order.createdAt)}</p>
+                            </div>
+                            {/* Display Order Items */}
+                            {order.items && order.items.length > 0 && (
+                              <div className="mt-3 pt-3 border-t border-gray-200">
+                                <p className="font-medium mb-2">Items:</p>
+                                <ul className="list-disc list-inside space-y-1">
+                                  {order.items.map(item => (
+                                    <li key={item.id} className="text-sm text-gray-700">
+                                      {item.name} (x{item.quantity})
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </Card>
+                        ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </TabsContent>
 
         <TabsContent value="activities">

@@ -2,8 +2,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ShieldAlert, PackageCheck, Calendar, Clock } from "lucide-react";
+import { ShieldAlert, PackageCheck, Calendar, Clock, RefreshCw } from "lucide-react";
 import FileDeliveryScanner from "@/components/FileDeliveryScanner";
+import DeliveryScanner from "@/components/DeliveryScanner";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { doc, getDoc, updateDoc, increment, collection, query, where, getDocs, orderBy, Timestamp, limit, startAfter } from "firebase/firestore";
 import { db } from "@/lib/firebase";
@@ -42,6 +43,7 @@ const Delivery = () => {
   const ORDERS_PER_PAGE = 10;
   const isFetching = useRef(false);
   const mounted = useRef(true);
+  const [scannerMethod, setScannerMethod] = useState<'file' | 'camera'>('file');
 
   const fetchCompletedOrders = useCallback(async (isInitial = false) => {
     if (!currentUser || isFetching.current || !mounted.current) return;
@@ -315,27 +317,65 @@ const Delivery = () => {
         {/* Scanner Section */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-center">Scan Delivery</CardTitle>
+            <CardTitle className="text-center">Delivery Scanner</CardTitle>
           </CardHeader>
           <CardContent>
             {scanning ? (
               <div className="text-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-campus-green mx-auto mb-4" />
-                <p>Processing delivery...</p>
+                <p>Processing scan...</p>
               </div>
             ) : (
-              <FileDeliveryScanner 
-                onScanSuccess={handleScanSuccess}
-                onOrderCompleted={fetchCompletedOrders}
-              />
+              <div className="flex flex-col items-center justify-center space-y-6">
+                <div className="flex space-x-4">
+                  <Button 
+                    variant={scannerMethod === 'file' ? 'default' : 'outline'}
+                    onClick={() => setScannerMethod('file')}
+                    className={scannerMethod === 'file' ? 'bg-campus-green hover:bg-campus-green/90' : ''}
+                  >
+                    Upload QR Code Image
+                  </Button>
+                  <Button 
+                    variant={scannerMethod === 'camera' ? 'default' : 'outline'}
+                    onClick={() => setScannerMethod('camera')}
+                    className={scannerMethod === 'camera' ? 'bg-campus-green hover:bg-campus-green/90' : ''}
+                  >
+                    Scan with Camera
+                  </Button>
+                </div>
+                
+                {scannerMethod === 'file' && (
+                  <FileDeliveryScanner 
+                    onScanSuccess={handleScanSuccess} 
+                    onOrderCompleted={() => fetchCompletedOrders(true)}
+                  />
+                )}
+
+                {scannerMethod === 'camera' && (
+                  <DeliveryScanner 
+                    // onScanSuccess={handleScanSuccess} // Removed as it's handled internally by DeliveryScanner
+                    // Note: DeliveryScanner component might need adaptation to use onOrderCompleted
+                    // Assuming it calls onScanSuccess with userId upon completion
+                  />
+                )}
+              </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Completed Orders Section */}
+        {/* Completed Deliveries Section */}
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-center">Completed Deliveries</CardTitle>
+            {/* Refresh Button */}
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => fetchCompletedOrders(true)} // Use fetchCompletedOrders to refresh
+              disabled={loading && completedOrders.length === 0} // Disable while initially loading
+            >
+              <RefreshCw className="h-4 w-4" />
+            </Button>
           </CardHeader>
           <CardContent>
             {loading && completedOrders.length === 0 ? (
@@ -349,7 +389,7 @@ const Delivery = () => {
                 <p>No completed deliveries yet</p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-500">
                 {completedOrders.map((order) => (
                   <Card key={order.id} className="p-4 hover:shadow-md transition-shadow">
                     <div className="flex justify-between items-start">
@@ -407,26 +447,6 @@ const Delivery = () => {
                     </div>
                   </Card>
                 ))}
-                
-                {/* Loading indicator */}
-                {loading && completedOrders.length > 0 && (
-                  <div className="text-center py-4">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-campus-green mx-auto" />
-                  </div>
-                )}
-                
-                {/* Load More Button */}
-                {hasMore && !loading && (
-                  <div className="text-center pt-4">
-                    <Button
-                      variant="outline"
-                      onClick={loadMoreOrders}
-                      className="w-full"
-                    >
-                      Load More
-                    </Button>
-                  </div>
-                )}
               </div>
             )}
           </CardContent>

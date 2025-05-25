@@ -2,9 +2,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ShieldAlert, Package, Calendar, Clock, ArrowLeft } from "lucide-react";
-import { useState, useEffect } from "react";
-import { collection, query, where, getDocs, orderBy, Timestamp } from "firebase/firestore";
+import { ShieldAlert, Package, Calendar, Clock, ArrowLeft, RefreshCw } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { collection, query, where, getDocs, orderBy, Timestamp, onSnapshot, Unsubscribe } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -30,55 +30,95 @@ const PendingOrders = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const fetchOrders = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Create query for undelivered orders
+      const ordersRef = collection(db, "orders");
+      const q = query(
+        ordersRef,
+        where("status", "in", ["pending", "order_placed"]),
+        orderBy("createdAt", "desc")
+      );
+
+      // Get the documents
+      const querySnapshot = await getDocs(q);
+      
+      // Process the documents with proper error handling
+      const fetchedOrders = querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          orderNumber: data.orderNumber || `ORD-${doc.id.slice(-6)}`,
+          customerName: data.userDetails?.name || 'Unknown',
+          customerEmail: data.userDetails?.email || 'No email',
+          items: data.items || [],
+          createdAt: data.createdAt,
+          deliveryDetails: data.deliveryDetails || {},
+          status: data.status || 'pending'
+        } as Order;
+      });
+
+      console.log("Fetched orders:", fetchedOrders);
+      setOrders(fetchedOrders);
+
+    } catch (error: any) {
+      console.error("Error fetching orders:", error);
+      setError(error.message || "Failed to fetch orders");
+      toast({
+        title: "Error",
+        description: "Failed to fetch orders. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [toast]);
+
   useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+    setLoading(true);
+    setError(null);
 
-        // Create query for undelivered orders
-        const ordersRef = collection(db, "orders");
-        const q = query(
-          ordersRef,
-          where("status", "==", "pending"),
-          orderBy("createdAt", "desc")
-        );
+    const ordersRef = collection(db, "orders");
+    const q = query(
+      ordersRef,
+      where("status", "in", ["pending", "order_placed"]),
+      orderBy("createdAt", "desc")
+    );
 
-        // Get the documents
-        const querySnapshot = await getDocs(q);
-        
-        // Process the documents with proper error handling
-        const fetchedOrders = querySnapshot.docs.map(doc => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            orderNumber: data.orderNumber || `ORD-${doc.id.slice(-6)}`,
-            customerName: data.userDetails?.name || 'Unknown',
-            customerEmail: data.userDetails?.email || 'No email',
-            items: data.items || [],
-            createdAt: data.createdAt,
-            deliveryDetails: data.deliveryDetails || {},
-            status: data.status || 'pending'
-          } as Order;
-        });
+    const unsubscribe: Unsubscribe = onSnapshot(q, (snapshot) => {
+      const fetchedOrders = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          orderNumber: data.orderNumber || `ORD-${doc.id.slice(-6)}`,
+          customerName: data.userDetails?.name || 'Unknown',
+          customerEmail: data.userDetails?.email || 'No email',
+          items: data.items || [],
+          createdAt: data.createdAt,
+          deliveryDetails: data.deliveryDetails || {},
+          status: data.status || 'pending'
+        } as Order;
+      });
 
-        console.log("Fetched orders:", fetchedOrders);
-        setOrders(fetchedOrders);
+      console.log("Real-time update: Fetched orders:", fetchedOrders);
+      setOrders(fetchedOrders);
+      setLoading(false);
+    }, (error) => {
+      console.error("Error fetching real-time orders:", error);
+      setError(error.message || "Failed to fetch real-time orders");
+      setLoading(false);
+      toast({
+        title: "Error",
+        description: "Failed to fetch real-time updates for pending orders.",
+        variant: "destructive",
+      });
+    });
 
-      } catch (error: any) {
-        console.error("Error fetching orders:", error);
-        setError(error.message || "Failed to fetch orders");
-        toast({
-          title: "Error",
-          description: "Failed to fetch orders. Please try again.",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
+    return () => unsubscribe();
 
-    fetchOrders();
   }, [toast]);
 
   if (!currentUser) {
@@ -138,8 +178,16 @@ const PendingOrders = () => {
       </div>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Pending Deliveries</CardTitle>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={fetchOrders}
+            disabled={loading}
+          >
+            <RefreshCw className="h-4 w-4" />
+          </Button>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -171,9 +219,9 @@ const PendingOrders = () => {
                   <div className="flex justify-between items-start">
                     <div className="space-y-2">
                       <div className="flex items-center space-x-2">
-                        <p className="font-medium">#{order.orderNumber}</p>
-                        <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
-                          Pending
+                        <p className="font-medium">#{order.orderNumber || order.id.slice(-6)}</p>
+                        <span className={`text-xs px-2 py-1 rounded ${order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'}`}>
+                          {order.status === 'pending' ? 'Pending' : 'Order Placed'}
                         </span>
                       </div>
                       <div className="space-y-1">

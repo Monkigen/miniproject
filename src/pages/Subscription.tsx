@@ -47,7 +47,7 @@ const SubscriptionPlans = () => {
     
     // Replace simulation with Razorpay integration
     const options = {
-      key: "rzp_test_C2KySCCdxfiFe6hroh1iZKTQY", // Replace with your actual test key ID
+      key: "rzp_test_ODB7Z9VYAIf2V9", // Replace with your actual test key ID
       amount: price * 100, // amount in smallest currency unit (Paisa)
       currency: "INR", // Replace with your currency code
       name: "Campus Kitchen",
@@ -67,15 +67,15 @@ const SubscriptionPlans = () => {
           const subscriptionData = {
             plan: planName,
             days: days,
-            tokens: tokensGained,
+            tokens: tokensGained, // Store tokens gained with this specific subscription
             startDate: new Date().toISOString(),
             endDate: new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString(),
             active: true
           };
           
           await updateDoc(userRef, {
-            subscription: subscriptionData,
-            tokens: (tokens || 0) + tokensGained, // Add tokens to user's account
+            subscription: subscriptionData, // Update the subscription details
+            tokens: (tokens || 0) + tokensGained, // Add tokens to the user's total token count
           });
           
           toast({
