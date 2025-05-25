@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,13 +9,32 @@ import { useToast } from "@/components/ui/use-toast";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
+// Declare Razorpay object type for TypeScript
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
+
 const SubscriptionPlans = () => {
   const { currentUser } = useAuth();
   const { tokens, subscription } = useSubscription();
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleSubscribe = async (plan: string, days: number, tokens: number, price: number) => {
+  // Load Razorpay script dynamically
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
+  const handleSubscribe = async (planName: string, days: number, tokensGained: number, price: number) => {
     if (!currentUser) {
       toast({
         title: "Please sign in",
@@ -26,46 +45,67 @@ const SubscriptionPlans = () => {
       return;
     }
     
-    // In a real implementation, this would redirect to a payment gateway
-    // For now, we'll simulate the subscription
-    try {
-      // Simulate payment gateway redirect
-      const confirmed = window.confirm("You will be redirected to payment gateway. Continue?");
-      if (!confirmed) return;
-      
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // After successful payment, update user's subscription and tokens in Firebase
-      const userRef = doc(db, "users", currentUser.uid);
-      const subscriptionData = {
-        plan,
-        days,
-        tokens,
-        startDate: new Date().toISOString(),
-        endDate: new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString(),
-        active: true
-      };
-      
-      await updateDoc(userRef, {
-        subscription: subscriptionData,
-        tokens: tokens // Add tokens to user's account
-      });
-      
-      toast({
-        title: "Subscription successful!",
-        description: `You have successfully subscribed to the ${plan} plan and received ${tokens} tokens.`,
-      });
-      
-      navigate("/tokens");
-    } catch (error) {
-      console.error("Error subscribing:", error);
-      toast({
-        title: "Subscription failed",
-        description: "There was an error processing your subscription. Please try again.",
-        variant: "destructive",
-      });
-    }
+    // Replace simulation with Razorpay integration
+    const options = {
+      key: "rzp_test_C2KySCCdxfiFe6hroh1iZKTQY", // Replace with your actual test key ID
+      amount: price * 100, // amount in smallest currency unit (Paisa)
+      currency: "INR", // Replace with your currency code
+      name: "Campus Kitchen",
+      description: `${planName} Plan Subscription`,
+      prefill: {
+        name: currentUser.displayName || "User",
+        email: currentUser.email || "",
+        // contact: 'YOUR_PHONE_NUMBER' // Optional: add user phone number if available
+      },
+      theme: {
+        color: "#4CAF50" // Your brand color
+      },
+      handler: async function (response: any) {
+        // Payment successful, update user's subscription and tokens in Firebase
+        try {
+          const userRef = doc(db, "users", currentUser.uid);
+          const subscriptionData = {
+            plan: planName,
+            days: days,
+            tokens: tokensGained,
+            startDate: new Date().toISOString(),
+            endDate: new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString(),
+            active: true
+          };
+          
+          await updateDoc(userRef, {
+            subscription: subscriptionData,
+            tokens: (tokens || 0) + tokensGained, // Add tokens to user's account
+          });
+          
+          toast({
+            title: "Subscription successful!",
+            description: `You have successfully subscribed to the ${planName} plan and received ${tokensGained} tokens.`,
+          });
+          
+          navigate("/tokens");
+        } catch (error) {
+          console.error("Error updating user data after payment:", error);
+          toast({
+            title: "Subscription failed",
+            description: "There was an error updating your subscription after payment. Please contact support.",
+            variant: "destructive",
+          });
+        }
+      },
+      modal: {
+        ondismiss: () => {
+          toast({
+            title: "Payment cancelled",
+            description: "Your payment was not completed.",
+            variant: "destructive",
+          });
+        }
+      }
+    };
+
+    const rzp1 = new window.Razorpay(options);
+    rzp1.open();
   };
   
   // Define subscription plans

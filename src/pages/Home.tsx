@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,13 +20,50 @@ import {
   Quote
 } from "lucide-react";
 
+// Add fade-out animation styles
+const fadeOutAnimation = `
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+`;
+
 const Home = () => {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
+  const [showWelcome, setShowWelcome] = useState(true);
+
+  useEffect(() => {
+    if (currentUser) {
+      setShowWelcome(true);
+      const timer = setTimeout(() => {
+        setShowWelcome(false);
+      }, 10000); // 10 seconds
+
+      return () => clearTimeout(timer);
+    }
+  }, [currentUser]);
 
   // Add console logging to debug
   console.log('Current User:', currentUser);
-  console.log('User Name:', currentUser?.displayName || currentUser?.name);
+  console.log('User Name:', currentUser?.displayName || currentUser?.email?.split('@')[0]);
 
   const handleOrderNow = () => {
     if (currentUser) {
@@ -122,6 +159,21 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#4CAE4F] via-[#45a049] to-[#3d8b40]">
+      <style>{fadeOutAnimation}</style>
+      
+      {/* Welcome Message Below Navbar */}
+      {showWelcome && currentUser && (
+        <div className="w-full bg-white/90 backdrop-blur-sm py-3 animate-slideIn">
+          <div className="container mx-auto px-4">
+            <div className="text-center">
+              <span className="text-[#4CAE4F] text-lg font-medium">
+                Welcome back, {currentUser.displayName || currentUser.email?.split('@')[0] || 'User'}!
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('/pattern.png')] opacity-10" />
@@ -129,7 +181,7 @@ const Home = () => {
           <div className="max-w-3xl">
             <div className="inline-block px-4 py-2 bg-white/20 rounded-full mb-8">
               <span className="text-white text-sm font-medium">
-                {currentUser ? `Welcome back, ${currentUser.displayName || currentUser.name || currentUser.email?.split('@')[0] || 'User'}!` : 'Welcome to Campus Kitchen'}
+                Welcome to Campus Kitchen
               </span>
             </div>
             <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold mb-8 sm:mb-10 leading-tight tracking-tight text-white">
